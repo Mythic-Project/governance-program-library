@@ -1,4 +1,4 @@
-name: Lint and Test
+name: Rust SBF Test
 
 on:
   push:
