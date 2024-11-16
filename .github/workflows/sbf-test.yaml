@@ -1,0 +1,52 @@
+name: Lint and Test
+
+on:
+  push:
+    branches: master
+  pull_request:
+    branches: master
+
+env:
+  CARGO_TERM_COLOR: always
+  SOLANA_VERSION: '1.18.18'
+  RUST_TOOLCHAIN: stable
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y pkg-config build-essential libudev-dev
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          override: true
+          profile: minimal
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v1
+
+      - name: Cache Solana binaries
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/solana
+            ~/.local/share/solana
+          key: ${{ runner.os }}-${{ env.SOLANA_VERSION }}
+
+      - name: Install Solana
+        run: |
+          echo Installing Solana v${{ env.SOLANA_VERSION }}...🧬
+          sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_VERSION }}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          export PATH="/home/runner/.local/share/solana/install/active_release/bin:$PATH"
+          echo Generating keypair...
+          solana-keygen new -o "$HOME/.config/solana/id.json" --no-passphrase --silent
+
+      - name: Run SBF tests
+        run: cargo test-sbf
