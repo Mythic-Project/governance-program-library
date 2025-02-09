@@ -3953,6 +3953,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
+name = "snapshot-voter"
+version = "0.0.1"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "arrayref",
+ "borsh 0.10.3",
+ "solana-program",
+ "solana-program-test",
+ "solana-sdk",
+ "spl-governance",
+ "spl-governance-addin-api",
+ "spl-governance-tools",
+ "static_assertions",
+]
+
+[[package]]
 name = "socket2"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"

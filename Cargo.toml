@@ -6,7 +6,8 @@ members = [
     "programs/nft-voter",
     "programs/bonk-plugin",
     "programs/token-haver",
-    "programs/token-voter"
+    "programs/token-voter",
+    "programs/snapshot-voter",
 ]
 resolver = "2"
 
