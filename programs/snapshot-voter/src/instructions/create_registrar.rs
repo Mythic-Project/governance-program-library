@@ -7,7 +7,7 @@ use spl_governance::state::realm;
 /// Creates Registrar storing Realm Voter configuration for spl-governance Realm
 /// This instruction should only be executed once per realm/governing_token_mint to create the account
 #[derive(Accounts)]
-#[instruction(_root: [u8;32], uri: Option<String>)]
+#[instruction()]
 pub struct CreateRegistrar<'info> {
     /// The Realm Voter Registrar
     /// There can only be a single registrar per governance Realm and governing mint of the Realm
@@ -16,7 +16,7 @@ pub struct CreateRegistrar<'info> {
         seeds = [b"registrar".as_ref(),realm.key().as_ref(), governing_token_mint.key().as_ref()],
         bump,
         payer = payer,
-        space = Registrar::get_space(uri)
+        space = Registrar::get_space(None)
     )]
     pub registrar: Account<'info, Registrar>,
 
@@ -55,13 +55,10 @@ pub struct CreateRegistrar<'info> {
 /// Creates a new Registrar which stores Realms voter configuration for the given Realm
 ///
 /// root is as well as the uri which is an offchain reference of the root
-pub fn create_registrar(ctx: Context<CreateRegistrar>, root: [u8;32], uri: Option<String>) -> Result<()> {
+pub fn create_registrar(ctx: Context<CreateRegistrar>) -> Result<()> {
     let registrar = &mut ctx.accounts.registrar;
     registrar.governance_program_id = ctx.accounts.governance_program_id.key();
     registrar.realm = ctx.accounts.realm.key();
-    registrar.governing_token_mint = ctx.accounts.governing_token_mint.key();
-    registrar.root = root;
-    registrar.uri = uri;
 
     // Verify that realm_authority is the expected authority of the Realm
     // and that the mint matches one of the realm mints too

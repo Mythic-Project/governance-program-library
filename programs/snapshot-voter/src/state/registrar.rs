@@ -41,6 +41,7 @@ pub struct Registrar {
 
     pub root: [u8; 32],
     pub uri: Option<String>,
+    pub proposal: Pubkey,
 }
 
 impl Registrar {
@@ -78,6 +79,7 @@ mod test {
             governing_token_mint: Pubkey::default(),
             root: [0; 32],
             uri: None,
+            proposal: Pubkey::default(),
         };
 
         // Act

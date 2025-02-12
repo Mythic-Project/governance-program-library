@@ -28,6 +28,9 @@ pub struct UpdateVoterWeightRecord<'info> {
     /// TokenOwnerRecord for any of the configured spl-governance instances
     /// CHECK: Owned by any of the spl-governance instances specified in registrar.governance_program_configs
     pub token_owner_record: UncheckedAccount<'info>,
+
+    /// CHECK: Checked below.
+    pub proposal: UncheckedAccount<'info>,
 }
 
 pub fn update_voter_weight_record(
@@ -39,6 +42,14 @@ pub fn update_voter_weight_record(
     let voter_weight_record = &mut ctx.accounts.voter_weight_record;
 
     let governance_program_id = ctx.accounts.token_owner_record.owner;
+
+    if ctx.accounts.registrar.root == [0; 32] {
+        return Err(SnapshotVoterError::MerkleRootMissing.into());
+    }
+
+    if ctx.accounts.registrar.proposal != ctx.accounts.proposal.key() {
+        return Err(SnapshotVoterError::ProposalMismatch.into());
+    }
 
     // Do the verification
     let verification_index_array: [u8; 8] = verification_data[0..8]
@@ -78,7 +89,7 @@ pub fn update_voter_weight_record(
         governance_program_id,
         &ctx.accounts.token_owner_record,
     )?;
-
+    
     // Ensure VoterWeightRecord and TokenOwnerRecord are for the same governing_token_owner
     require_eq!(
         token_owner_record.governing_token_owner,
@@ -101,7 +112,8 @@ pub fn update_voter_weight_record(
 
     // Set action and target to None to indicate the weight is valid for any action and target
     voter_weight_record.weight_action = None;
-    voter_weight_record.weight_action_target = None;
+    // the weight is valid for only a specific proposal
+    voter_weight_record.weight_action_target = Some(registrar.proposal);
 
     Ok(())
 }

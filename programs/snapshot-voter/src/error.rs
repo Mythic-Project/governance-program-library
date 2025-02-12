@@ -22,4 +22,13 @@ pub enum SnapshotVoterError {
 
     #[msg("Governing TokenOwner must match")]
     GoverningTokenOwnerMustMatch,
+
+    #[msg("Invalid Proposal state")]
+    InvalidProposalState,
+
+    #[msg("Merkle Root missing. Proposal state")]
+    MerkleRootMissing,
+    
+    #[msg("Proposal mismatch. Please update registrar")]
+    ProposalMismatch,
 }

@@ -2,7 +2,7 @@ use {
     crate::{error::*, state::*},
     anchor_lang::prelude::*,
     anchor_spl::token_interface::Mint,
-    spl_governance::state::realm,
+    spl_governance::state::{enums::ProposalState, proposal::get_proposal_data, realm},
 };
 
 /// Resizes Registrar storing Realm Voter configuration for spl-governance Realm
@@ -51,17 +51,31 @@ pub struct UpdateRegistrar<'info> {
     #[account(mut)]
     pub payer: Signer<'info>,
 
+    /// CHECK: Checked below.
+    pub proposal: UncheckedAccount<'info>,
+
     pub system_program: Program<'info, System>,
 }
 
 /// Updates a Registrar which stores Realms voter snapshot configuration for the given Realm
 ///
 /// root can be updated as well as the uri which is an offchain reference of the root
-pub fn update_registrar(ctx: Context<UpdateRegistrar>, root: [u8;32], uri: Option<String>) -> Result<()> {
+pub fn update_registrar(
+    ctx: Context<UpdateRegistrar>,
+    root: [u8; 32],
+    uri: Option<String>,
+) -> Result<()> {
     let registrar = &mut ctx.accounts.registrar;
 
     registrar.root = root;
     registrar.uri = uri;
+    registrar.proposal = ctx.accounts.proposal.key();
+
+    let proposal = get_proposal_data(&registrar.governance_program_id, &ctx.accounts.proposal)?;
+
+    if proposal.state != ProposalState::Draft {
+        return Err(SnapshotVoterError::InvalidProposalState.into());
+    }
 
     // Verify that realm_authority is the expected authority of the Realm
     // and that the mint matches one of the realm mints too
