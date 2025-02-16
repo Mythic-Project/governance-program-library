@@ -52,9 +52,7 @@ pub struct CreateRegistrar<'info> {
     pub system_program: Program<'info, System>,
 }
 
-/// Creates a new Registrar which stores Realms voter configuration for the given Realm
-///
-/// root is as well as the uri which is an offchain reference of the root
+/// Creates a new Registrar which stores Snapshot voter configuration for the given Realm
 pub fn create_registrar(ctx: Context<CreateRegistrar>) -> Result<()> {
     let registrar = &mut ctx.accounts.registrar;
     registrar.governance_program_id = ctx.accounts.governance_program_id.key();

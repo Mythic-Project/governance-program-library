@@ -5,8 +5,8 @@ use {
     spl_governance::state::{enums::ProposalState, proposal::get_proposal_data, realm},
 };
 
-/// Resizes Registrar storing Realm Voter configuration for spl-governance Realm
-/// This instruction can only be ran if the max_mint is higher than currently used voting_mint_configs length
+/// Updates Registrar storing Snapshot Voter configuration for spl-governance Realm
+/// Updates the root and the uri for the given proposal
 #[derive(Accounts)]
 #[instruction(_root: [u8;32], uri: Option<String>)]
 pub struct UpdateRegistrar<'info> {
@@ -60,6 +60,7 @@ pub struct UpdateRegistrar<'info> {
 /// Updates a Registrar which stores Realms voter snapshot configuration for the given Realm
 ///
 /// root can be updated as well as the uri which is an offchain reference of the root
+/// every update_registar instruction is specific for a proposal
 pub fn update_registrar(
     ctx: Context<UpdateRegistrar>,
     root: [u8; 32],

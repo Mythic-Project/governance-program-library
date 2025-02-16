@@ -8,8 +8,8 @@ use std::convert::TryInto;
 /// Updates VoterWeightRecord based on Realm DAO membership
 /// The membership is evaluated via a valid TokenOwnerRecord which must belong to one of the configured spl-governance instances
 ///
-/// This instruction sets VoterWeightRecord.voter_weight which is valid for the current slot only
-/// and must be executed inside the same transaction as the corresponding spl-gov instruction
+/// This instruction sets VoterWeightRecord.voter_weight which is valid if the user is in the root which has been updated 
+/// via update_registrar instruction. The weight is valid for the current slot only.
 #[derive(Accounts)]
 pub struct UpdateVoterWeightRecord<'info> {
     /// The RealmVoter voting Registrar
