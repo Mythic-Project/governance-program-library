@@ -39,8 +39,13 @@ pub struct Registrar {
     /// and the actual token of the mint is not used
     pub governing_token_mint: Pubkey,
 
+    /// Merkle root of the snapshot
     pub root: [u8; 32],
+
+    /// Offchain reference of the merkle root snapshot
     pub uri: Option<String>,
+
+    /// Proposal that the root is valid for
     pub proposal: Pubkey,
 }
 

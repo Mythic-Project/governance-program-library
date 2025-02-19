@@ -31,3 +31,4 @@ spl-governance-addin-api = "0.1.4"
 borsh = "0.10.3"
 solana-sdk = "1.18.18"
 solana-program-test = "1.18.18"
+spl-token = { version = "4.0.0", features = [ "no-entrypoint" ] }

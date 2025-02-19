@@ -1,5 +1,5 @@
-use crate::program_test::realm_voter_test::RealmVoterTest;
-use gpl_realm_voter::{error::RealmVoterError, state::CollectionItemChangeType};
+use crate::program_test::snapshot_voter_test::SnapshotVoterTest;
+use snapshot_voter::{error::SnapshotVoterError, state::CollectionItemChangeType};
 use program_test::tools::*;
 use solana_program_test::*;
 use solana_sdk::transport::TransportError;
@@ -8,23 +8,23 @@ mod program_test;
 #[tokio::test]
 async fn test_update_voter_weight_record() -> Result<(), TransportError> {
     // Arrange
-    let mut realm_voter_test = RealmVoterTest::start_new().await;
+    let mut snapshot_voter_test = SnapshotVoterTest::start_new().await;
 
-    let realm_cookie = realm_voter_test.governance.with_realm().await?;
+    let realm_cookie = snapshot_voter_test.governance.with_realm().await?;
 
-    let registrar_cookie = realm_voter_test.with_registrar(&realm_cookie).await?;
+    let registrar_cookie = snapshot_voter_test.with_registrar(&realm_cookie).await?;
 
     // Create TokenOwnerRecord for other Realm
-    let realm_cookie2 = realm_voter_test.governance.with_realm().await?;
-    let token_owner_cookie = realm_voter_test.bench.with_wallet().await;
-    let token_owner_record_cookie = realm_voter_test
+    let realm_cookie2 = snapshot_voter_test.governance.with_realm().await?;
+    let token_owner_cookie = snapshot_voter_test.bench.with_wallet().await;
+    let token_owner_record_cookie = snapshot_voter_test
         .governance
         .with_token_owner_record(&realm_cookie2, &token_owner_cookie)
         .await?;
 
-    let governance_program_cookie = realm_voter_test.with_governance_program(None).await;
+    let governance_program_cookie = snapshot_voter_test.with_governance_program(None).await;
 
-    realm_voter_test
+    snapshot_voter_test
         .configure_governance_program(
             &registrar_cookie,
             &governance_program_cookie,
@@ -32,15 +32,15 @@ async fn test_update_voter_weight_record() -> Result<(), TransportError> {
         )
         .await?;
 
-    let mut voter_weight_record_cookie = realm_voter_test
+    let mut voter_weight_record_cookie = snapshot_voter_test
         .with_voter_weight_record(&registrar_cookie, &token_owner_cookie)
         .await?;
 
-    let mut max_voter_weight_record_cookie = realm_voter_test
+    let mut max_voter_weight_record_cookie = snapshot_voter_test
         .with_max_voter_weight_record(&registrar_cookie)
         .await?;
 
-    realm_voter_test
+    snapshot_voter_test
         .configure_voter_weights(
             &registrar_cookie,
             &mut max_voter_weight_record_cookie,
@@ -49,10 +49,10 @@ async fn test_update_voter_weight_record() -> Result<(), TransportError> {
         )
         .await?;
 
-    let clock = realm_voter_test.bench.get_clock().await;
+    let clock = snapshot_voter_test.bench.get_clock().await;
 
     // Act
-    realm_voter_test
+    snapshot_voter_test
         .update_voter_weight_record(
             &registrar_cookie,
             &mut voter_weight_record_cookie,
@@ -62,7 +62,7 @@ async fn test_update_voter_weight_record() -> Result<(), TransportError> {
 
     // Assert
 
-    let voter_weight_record = realm_voter_test
+    let voter_weight_record = snapshot_voter_test
         .get_voter_weight_record(&voter_weight_record_cookie.address)
         .await;
 
@@ -78,21 +78,21 @@ async fn test_update_voter_weight_record() -> Result<(), TransportError> {
 async fn test_update_voter_weight_record_with_token_owner_record_from_own_realm_not_allowed_error(
 ) -> Result<(), TransportError> {
     // Arrange
-    let mut realm_voter_test = RealmVoterTest::start_new().await;
+    let mut snapshot_voter_test = SnapshotVoterTest::start_new().await;
 
-    let realm_cookie = realm_voter_test.governance.with_realm().await?;
+    let realm_cookie = snapshot_voter_test.governance.with_realm().await?;
 
-    let registrar_cookie = realm_voter_test.with_registrar(&realm_cookie).await?;
+    let registrar_cookie = snapshot_voter_test.with_registrar(&realm_cookie).await?;
 
-    let token_owner_cookie = realm_voter_test.bench.with_wallet().await;
-    let token_owner_record_cookie = realm_voter_test
+    let token_owner_cookie = snapshot_voter_test.bench.with_wallet().await;
+    let token_owner_record_cookie = snapshot_voter_test
         .governance
         .with_token_owner_record(&realm_cookie, &token_owner_cookie)
         .await?;
 
-    let governance_program_cookie = realm_voter_test.with_governance_program(None).await;
+    let governance_program_cookie = snapshot_voter_test.with_governance_program(None).await;
 
-    realm_voter_test
+    snapshot_voter_test
         .configure_governance_program(
             &registrar_cookie,
             &governance_program_cookie,
@@ -100,12 +100,12 @@ async fn test_update_voter_weight_record_with_token_owner_record_from_own_realm_
         )
         .await?;
 
-    let mut voter_weight_record_cookie = realm_voter_test
+    let mut voter_weight_record_cookie = snapshot_voter_test
         .with_voter_weight_record(&registrar_cookie, &token_owner_cookie)
         .await?;
 
     // Act
-    let err = realm_voter_test
+    let err = snapshot_voter_test
         .update_voter_weight_record(
             &registrar_cookie,
             &mut voter_weight_record_cookie,
@@ -116,7 +116,7 @@ async fn test_update_voter_weight_record_with_token_owner_record_from_own_realm_
         .unwrap();
 
     // Assert
-    assert_realm_voter_err(err, RealmVoterError::TokenOwnerRecordFromOwnRealmNotAllowed);
+    assert_realm_voter_err(err, SnapshotVoterError::TokenOwnerRecordFromOwnRealmNotAllowed);
 
     Ok(())
 }
@@ -125,26 +125,26 @@ async fn test_update_voter_weight_record_with_token_owner_record_from_own_realm_
 async fn test_update_voter_weight_record_for_member_from_not_configured_governance_program_error(
 ) -> Result<(), TransportError> {
     // Arrange
-    let mut realm_voter_test = RealmVoterTest::start_new().await;
+    let mut snapshot_voter_test = SnapshotVoterTest::start_new().await;
 
-    let realm_cookie = realm_voter_test.governance.with_realm().await?;
+    let realm_cookie = snapshot_voter_test.governance.with_realm().await?;
 
-    let registrar_cookie = realm_voter_test.with_registrar(&realm_cookie).await?;
+    let registrar_cookie = snapshot_voter_test.with_registrar(&realm_cookie).await?;
 
     // Create TokenOwnerRecord for other Realm
-    let realm_cookie2 = realm_voter_test.governance.with_realm().await?;
-    let token_owner_cookie = realm_voter_test.bench.with_wallet().await;
-    let token_owner_record_cookie = realm_voter_test
+    let realm_cookie2 = snapshot_voter_test.governance.with_realm().await?;
+    let token_owner_cookie = snapshot_voter_test.bench.with_wallet().await;
+    let token_owner_record_cookie = snapshot_voter_test
         .governance
         .with_token_owner_record(&realm_cookie2, &token_owner_cookie)
         .await?;
 
-    let mut voter_weight_record_cookie = realm_voter_test
+    let mut voter_weight_record_cookie = snapshot_voter_test
         .with_voter_weight_record(&registrar_cookie, &token_owner_cookie)
         .await?;
 
     // Act
-    let err = realm_voter_test
+    let err = snapshot_voter_test
         .update_voter_weight_record(
             &registrar_cookie,
             &mut voter_weight_record_cookie,
@@ -156,7 +156,7 @@ async fn test_update_voter_weight_record_for_member_from_not_configured_governan
 
     // Assert
 
-    assert_realm_voter_err(err, RealmVoterError::GovernanceProgramNotConfigured);
+    assert_realm_voter_err(err, SnapshotVoterError::GovernanceProgramNotConfigured);
 
     Ok(())
 }
@@ -165,15 +165,15 @@ async fn test_update_voter_weight_record_for_member_from_not_configured_governan
 async fn test_update_voter_weight_record_with_token_owner_record_must_match_error(
 ) -> Result<(), TransportError> {
     // Arrange
-    let mut realm_voter_test = RealmVoterTest::start_new().await;
+    let mut snapshot_voter_test = SnapshotVoterTest::start_new().await;
 
-    let realm_cookie = realm_voter_test.governance.with_realm().await?;
+    let realm_cookie = snapshot_voter_test.governance.with_realm().await?;
 
-    let registrar_cookie = realm_voter_test.with_registrar(&realm_cookie).await?;
+    let registrar_cookie = snapshot_voter_test.with_registrar(&realm_cookie).await?;
 
-    let governance_program_cookie = realm_voter_test.with_governance_program(None).await;
+    let governance_program_cookie = snapshot_voter_test.with_governance_program(None).await;
 
-    realm_voter_test
+    snapshot_voter_test
         .configure_governance_program(
             &registrar_cookie,
             &governance_program_cookie,
@@ -182,21 +182,21 @@ async fn test_update_voter_weight_record_with_token_owner_record_must_match_erro
         .await?;
 
     // Create TokenOwnerRecord for other Realm
-    let realm_cookie2 = realm_voter_test.governance.with_realm().await?;
-    let token_owner_cookie = realm_voter_test.bench.with_wallet().await;
-    let token_owner_record_cookie = realm_voter_test
+    let realm_cookie2 = snapshot_voter_test.governance.with_realm().await?;
+    let token_owner_cookie = snapshot_voter_test.bench.with_wallet().await;
+    let token_owner_record_cookie = snapshot_voter_test
         .governance
         .with_token_owner_record(&realm_cookie2, &token_owner_cookie)
         .await?;
 
-    let token_owner_cookie2 = realm_voter_test.bench.with_wallet().await;
+    let token_owner_cookie2 = snapshot_voter_test.bench.with_wallet().await;
 
-    let mut voter_weight_record_cookie = realm_voter_test
+    let mut voter_weight_record_cookie = snapshot_voter_test
         .with_voter_weight_record(&registrar_cookie, &token_owner_cookie2)
         .await?;
 
     // Act
-    let err = realm_voter_test
+    let err = snapshot_voter_test
         .update_voter_weight_record(
             &registrar_cookie,
             &mut voter_weight_record_cookie,
@@ -208,7 +208,7 @@ async fn test_update_voter_weight_record_with_token_owner_record_must_match_erro
 
     // Assert
 
-    assert_realm_voter_err(err, RealmVoterError::GoverningTokenOwnerMustMatch);
+    assert_realm_voter_err(err, SnapshotVoterError::GoverningTokenOwnerMustMatch);
 
     Ok(())
 }

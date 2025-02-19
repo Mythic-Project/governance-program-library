@@ -3,7 +3,7 @@
 macro_rules! vote_weight_record {
     ($id:expr) => {
         /// Anchor wrapper for the SPL governance program's VoterWeightRecord type.
-        #[derive(Clone)]
+        #[derive(Clone, Debug, PartialEq)]
         pub struct VoterWeightRecord(spl_governance_addin_api::voter_weight::VoterWeightRecord);
 
         impl VoterWeightRecord {
@@ -102,7 +102,7 @@ macro_rules! vote_weight_record {
 macro_rules! max_voter_weight_record {
     ($id:expr) => {
         /// Anchor wrapper for the SPL governance program's MaxVoterWeightRecord type.
-        #[derive(Clone)]
+        #[derive(Clone, Debug, PartialEq)]
         pub struct MaxVoterWeightRecord(spl_governance_addin_api::max_voter_weight::MaxVoterWeightRecord);
 
         impl MaxVoterWeightRecord {

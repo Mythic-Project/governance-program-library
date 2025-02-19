@@ -65,7 +65,7 @@ pub fn create_registrar(ctx: Context<CreateRegistrar>) -> Result<()> {
         &ctx.accounts.realm,
         &registrar.governing_token_mint,
     )?;
-
+    
     require_eq!(
         realm.authority.unwrap(),
         ctx.accounts.realm_authority.key(),

@@ -2,10 +2,7 @@ use std::sync::Arc;
 
 use anchor_lang::prelude::Pubkey;
 
-use gpl_realm_voter::state::max_voter_weight_record::{
-    get_max_voter_weight_record_address, MaxVoterWeightRecord,
-};
-use gpl_realm_voter::state::*;
+use snapshot_voter::state::*;
 
 use solana_program_test::{BanksClientError, ProgramTest};
 use solana_sdk::instruction::Instruction;
@@ -31,44 +28,42 @@ pub struct RegistrarCookie {
     pub max_governance_programs: u8,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct VoterWeightRecordCookie {
     pub address: Pubkey,
     pub account: VoterWeightRecord,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct MaxVoterWeightRecordCookie {
     pub address: Pubkey,
     pub account: MaxVoterWeightRecord,
-}
-
-pub struct GovernanceProgramConfigCookie {
-    pub program_config: GovernanceProgramConfig,
 }
 
 pub struct GovernanceProgramCookie {
     pub program_id: Pubkey,
 }
 
-pub struct RealmVoterTest {
+pub struct SnapshotVoterTest {
     pub program_id: Pubkey,
     pub bench: Arc<ProgramTestBench>,
     pub governance: GovernanceTest,
 }
 
-impl RealmVoterTest {
+impl SnapshotVoterTest {
     #[allow(dead_code)]
     pub fn add_program(program_test: &mut ProgramTest) {
-        program_test.add_program("gpl_realm_voter", gpl_realm_voter::id(), None);
+        program_test.add_program("snapshot_voter", snapshot_voter::id(), None);
     }
 
     #[allow(dead_code)]
     pub async fn start_new() -> Self {
         let mut program_test = ProgramTest::default();
 
-        RealmVoterTest::add_program(&mut program_test);
+        SnapshotVoterTest::add_program(&mut program_test);
         GovernanceTest::add_program(&mut program_test);
 
-        let program_id = gpl_realm_voter::id();
+        let program_id = snapshot_voter::id();
 
         let bench = ProgramTestBench::start_new(program_test).await;
         let bench_rc = Arc::new(bench);
@@ -116,12 +111,12 @@ impl RealmVoterTest {
         let max_governance_programs = 10;
 
         let data =
-            anchor_lang::InstructionData::data(&gpl_realm_voter::instruction::CreateRegistrar {
-                max_governance_programs,
+            anchor_lang::InstructionData::data(&snapshot_voter::instruction::CreateRegistrar {
+            
             });
 
         let accounts = anchor_lang::ToAccountMetas::to_account_metas(
-            &gpl_realm_voter::accounts::CreateRegistrar {
+            &snapshot_voter::accounts::CreateRegistrar {
                 registrar: registrar_key,
                 realm: realm_cookie.address,
                 governance_program_id: self.governance.program_id,
@@ -134,7 +129,7 @@ impl RealmVoterTest {
         );
 
         let mut create_registrar_ix = Instruction {
-            program_id: gpl_realm_voter::id(),
+            program_id: snapshot_voter::id(),
             accounts,
             data,
         };
@@ -152,10 +147,9 @@ impl RealmVoterTest {
             governance_program_id: self.governance.program_id,
             realm: realm_cookie.address,
             governing_token_mint: realm_cookie.account.community_mint,
-            governance_program_configs: vec![],
-            reserved: [0; 128],
-            max_voter_weight: 0,
-            realm_member_voter_weight: 0,
+            root: [0; 32],
+            uri: None,
+            proposal: Pubkey::default(),
         };
 
         Ok(RegistrarCookie {
@@ -192,16 +186,16 @@ impl RealmVoterTest {
                 registrar_cookie.account.governing_token_mint.as_ref(),
                 governing_token_owner.as_ref(),
             ],
-            &gpl_realm_voter::id(),
+            &snapshot_voter::id(),
         );
 
         let data = anchor_lang::InstructionData::data(
-            &gpl_realm_voter::instruction::CreateVoterWeightRecord {
+            &snapshot_voter::instruction::CreateVoterWeightRecord {
                 governing_token_owner,
             },
         );
 
-        let accounts = gpl_realm_voter::accounts::CreateVoterWeightRecord {
+        let accounts = snapshot_voter::accounts::CreateVoterWeightRecord {
             registrar: registrar_cookie.address,
             voter_weight_record: voter_weight_record_key,
             payer: self.bench.payer.pubkey(),
@@ -209,7 +203,7 @@ impl RealmVoterTest {
         };
 
         let mut create_voter_weight_record_ix = Instruction {
-            program_id: gpl_realm_voter::id(),
+            program_id: snapshot_voter::id(),
             accounts: anchor_lang::ToAccountMetas::to_account_metas(&accounts, None),
             data,
         };
@@ -220,16 +214,15 @@ impl RealmVoterTest {
             .process_transaction(&[create_voter_weight_record_ix], None)
             .await?;
 
-        let account = VoterWeightRecord {
-            realm: registrar_cookie.account.realm,
-            governing_token_mint: registrar_cookie.account.governing_token_mint,
+        let account = VoterWeightRecord::new(
+            registrar_cookie.account.realm,
+            registrar_cookie.account.governing_token_mint,
             governing_token_owner,
-            voter_weight: 0,
-            voter_weight_expiry: Some(0),
-            weight_action: None,
-            weight_action_target: None,
-            reserved: [0; 8],
-        };
+            0,
+            Some(0),
+            None,
+            None,
+        );
 
         Ok(VoterWeightRecordCookie {
             address: voter_weight_record_key,
@@ -252,24 +245,26 @@ impl RealmVoterTest {
         registrar_cookie: &RegistrarCookie,
         instruction_override: F,
     ) -> Result<MaxVoterWeightRecordCookie, BanksClientError> {
-        let max_voter_weight_record_key = get_max_voter_weight_record_address(
+        let max_voter_weight_record_key = MaxVoterWeightRecord::get_max_voter_weight_record_address(
             &registrar_cookie.account.realm,
             &registrar_cookie.account.governing_token_mint,
         );
 
         let data = anchor_lang::InstructionData::data(
-            &gpl_realm_voter::instruction::CreateMaxVoterWeightRecord {},
+            &snapshot_voter::instruction::CreateMaxVoterWeightRecord {},
         );
 
-        let accounts = gpl_realm_voter::accounts::CreateMaxVoterWeightRecord {
+        let accounts = snapshot_voter::accounts::CreateMaxVoterWeightRecord {
             registrar: registrar_cookie.address,
             max_voter_weight_record: max_voter_weight_record_key,
             payer: self.bench.payer.pubkey(),
+            realm: registrar_cookie.account.realm,
+            governance_program_id: self.governance.program_id,
+            realm_governing_token_mint: registrar_cookie.account.governing_token_mint,
             system_program: solana_sdk::system_program::id(),
         };
-
         let mut create_max_voter_weight_record_ix = Instruction {
-            program_id: gpl_realm_voter::id(),
+            program_id: snapshot_voter::id(),
             accounts: anchor_lang::ToAccountMetas::to_account_metas(&accounts, None),
             data,
         };
@@ -280,13 +275,13 @@ impl RealmVoterTest {
             .process_transaction(&[create_max_voter_weight_record_ix], None)
             .await?;
 
-        let account = MaxVoterWeightRecord {
-            realm: registrar_cookie.account.realm,
-            governing_token_mint: registrar_cookie.account.governing_token_mint,
-            max_voter_weight: 0,
-            max_voter_weight_expiry: Some(0),
-            reserved: [0; 8],
-        };
+            let account = MaxVoterWeightRecord::new(
+                registrar_cookie.account.realm,
+                registrar_cookie.account.governing_token_mint,
+                0,
+                Some(0),
+            );
+    
 
         Ok(MaxVoterWeightRecordCookie {
             account,
@@ -300,148 +295,30 @@ impl RealmVoterTest {
         registrar_cookie: &RegistrarCookie,
         voter_weight_record_cookie: &mut VoterWeightRecordCookie,
         token_owner_record_cookie: &TokenOwnerRecordCookie,
+        proposal_key: &Pubkey,
+        amount: u64,
+        verification_data: Vec<u8>,
     ) -> Result<(), BanksClientError> {
         let data = anchor_lang::InstructionData::data(
-            &gpl_realm_voter::instruction::UpdateVoterWeightRecord {},
+            &snapshot_voter::instruction::UpdateVoterWeightRecord {amount, verification_data},
         );
 
-        let accounts = gpl_realm_voter::accounts::UpdateVoterWeightRecord {
+        let accounts = snapshot_voter::accounts::UpdateVoterWeightRecord {
             registrar: registrar_cookie.address,
             voter_weight_record: voter_weight_record_cookie.address,
             token_owner_record: token_owner_record_cookie.address,
+            proposal: *proposal_key,
         };
 
         let account_metas = anchor_lang::ToAccountMetas::to_account_metas(&accounts, None);
 
         let instructions = vec![Instruction {
-            program_id: gpl_realm_voter::id(),
+            program_id: snapshot_voter::id(),
             accounts: account_metas,
             data,
         }];
 
         self.bench.process_transaction(&instructions, None).await
-    }
-
-    #[allow(dead_code)]
-    pub async fn configure_voter_weights(
-        &self,
-        registrar_cookie: &RegistrarCookie,
-        max_voter_weight_record_cookie: &mut MaxVoterWeightRecordCookie,
-        realm_member_voter_weight: u64,
-        max_voter_weight: u64,
-    ) -> Result<(), BanksClientError> {
-        self.configure_voter_weights_using_ix(
-            registrar_cookie,
-            max_voter_weight_record_cookie,
-            realm_member_voter_weight,
-            max_voter_weight,
-            NopOverride,
-            None,
-        )
-        .await
-    }
-
-    #[allow(dead_code)]
-    pub async fn configure_voter_weights_using_ix<F: Fn(&mut Instruction)>(
-        &self,
-        registrar_cookie: &RegistrarCookie,
-        max_voter_weight_record_cookie: &mut MaxVoterWeightRecordCookie,
-        realm_member_voter_weight: u64,
-        max_voter_weight: u64,
-        instruction_override: F,
-        signers_override: Option<&[&Keypair]>,
-    ) -> Result<(), BanksClientError> {
-        let data = anchor_lang::InstructionData::data(
-            &gpl_realm_voter::instruction::ConfigureVoterWeights {
-                max_voter_weight,
-                realm_member_voter_weight,
-            },
-        );
-
-        let accounts = gpl_realm_voter::accounts::ConfigureVoterWeights {
-            registrar: registrar_cookie.address,
-            max_voter_weight_record: max_voter_weight_record_cookie.address,
-            realm: registrar_cookie.account.realm,
-            realm_authority: registrar_cookie.realm_authority.pubkey(),
-        };
-
-        let account_metas = anchor_lang::ToAccountMetas::to_account_metas(&accounts, None);
-
-        let mut configure_voter_weights_ix = Instruction {
-            program_id: gpl_realm_voter::id(),
-            accounts: account_metas,
-            data,
-        };
-        instruction_override(&mut configure_voter_weights_ix);
-
-        let default_signers = &[&registrar_cookie.realm_authority];
-        let signers = signers_override.unwrap_or(default_signers);
-
-        self.bench
-            .process_transaction(&[configure_voter_weights_ix], Some(signers))
-            .await
-    }
-
-    #[allow(dead_code)]
-    pub async fn configure_governance_program(
-        &mut self,
-        registrar_cookie: &RegistrarCookie,
-        governance_program_cookie: &GovernanceProgramCookie,
-        change_type: CollectionItemChangeType,
-    ) -> Result<GovernanceProgramConfigCookie, BanksClientError> {
-        self.configure_governance_program_using_ix(
-            registrar_cookie,
-            governance_program_cookie,
-            change_type,
-            NopOverride,
-            None,
-        )
-        .await
-    }
-
-    #[allow(dead_code)]
-    pub async fn configure_governance_program_using_ix<F: Fn(&mut Instruction)>(
-        &mut self,
-        registrar_cookie: &RegistrarCookie,
-        governance_program_cookie: &GovernanceProgramCookie,
-        change_type: CollectionItemChangeType,
-        instruction_override: F,
-        signers_override: Option<&[&Keypair]>,
-    ) -> Result<GovernanceProgramConfigCookie, BanksClientError> {
-        let data = anchor_lang::InstructionData::data(
-            &gpl_realm_voter::instruction::ConfigureGovernanceProgram { change_type },
-        );
-
-        let accounts = gpl_realm_voter::accounts::ConfigureGovernanceProgram {
-            registrar: registrar_cookie.address,
-            realm: registrar_cookie.account.realm,
-            realm_authority: registrar_cookie.realm_authority.pubkey(),
-            governance_program_id: governance_program_cookie.program_id.clone(),
-        };
-
-        let mut configure_governance_program_ix = Instruction {
-            program_id: gpl_realm_voter::id(),
-            accounts: anchor_lang::ToAccountMetas::to_account_metas(&accounts, None),
-            data,
-        };
-
-        instruction_override(&mut configure_governance_program_ix);
-
-        let default_signers = &[&registrar_cookie.realm_authority];
-        let signers = signers_override.unwrap_or(default_signers);
-
-        self.bench
-            .process_transaction(&[configure_governance_program_ix], Some(signers))
-            .await?;
-
-        let governance_program_config = GovernanceProgramConfig {
-            program_id: governance_program_cookie.program_id.clone(),
-            reserved: [0; 8],
-        };
-
-        Ok(GovernanceProgramConfigCookie {
-            program_config: governance_program_config,
-        })
     }
 
     #[allow(dead_code)]
