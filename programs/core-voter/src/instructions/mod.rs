@@ -19,5 +19,5 @@ mod relinquish_nft_vote;
 pub use cast_nft_vote::*;
 mod cast_nft_vote;
 
-pub use udpate_max_voter_weight_record::*;
-mod udpate_max_voter_weight_record;
+pub use update_max_voter_weight_record::*;
+mod update_max_voter_weight_record;

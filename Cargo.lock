@@ -1828,7 +1828,7 @@ dependencies = [
  "anchor-spl",
  "arrayref",
  "borsh 0.10.3",
- "itertools",
+ "itertools 0.10.5",
  "mpl-core",
  "mpl-token-metadata",
  "solana-program",
