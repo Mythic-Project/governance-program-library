@@ -4,9 +4,13 @@ members = [
     "programs/quadratic",
     "programs/realm-voter",
     "programs/nft-voter",
+    "programs/bonk-plugin",
     "programs/token-haver",
     "programs/core-voter"
+    "programs/token-voter"
 ]
+
+resolver = "2"
 
 [profile.release]
 overflow-checks = true
