@@ -44,6 +44,9 @@ pub struct CastNftVote<'info> {
     pub voter_authority: Signer<'info>,
 
     /// CHECK: The account is validated in the instruction
+    #[account(
+        owner = registrar.governance_program_id
+     )]
     proposal: UncheckedAccount<'info>,
 
     /// The account which pays for the transaction

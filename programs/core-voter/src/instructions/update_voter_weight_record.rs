@@ -26,6 +26,14 @@ pub struct UpdateVoterWeightRecord<'info> {
         @ NftVoterError::InvalidVoterWeightRecordMint,
     )]
     pub voter_weight_record: Account<'info, VoterWeightRecord>,
+
+    #[account(
+        owner = registrar.governance_program_id
+     )]
+    /// CHECK: Owned by spl-governance instance specified in registrar.governance_program_id
+    voter_token_owner_record: UncheckedAccount<'info>,
+
+    pub voter_authority: Signer<'info>,
 }
 
 pub fn update_voter_weight_record(
@@ -33,7 +41,13 @@ pub fn update_voter_weight_record(
     voter_weight_action: VoterWeightAction,
 ) -> Result<()> {
     let registrar = &ctx.accounts.registrar;
-    let governing_token_owner = &ctx.accounts.voter_weight_record.governing_token_owner;
+
+    let governing_token_owner = resolve_governing_token_owner(
+        registrar,
+        &ctx.accounts.voter_token_owner_record,
+        &ctx.accounts.voter_authority,
+        &ctx.accounts.voter_weight_record
+    )?;
 
     match voter_weight_action {
         // voter_weight for CastVote action can't be evaluated using this instruction
@@ -56,7 +70,7 @@ pub fn update_voter_weight_record(
 
         let (nft_vote_weight, _) = resolve_nft_vote_weight_and_mint(
             registrar,
-            governing_token_owner,
+            &governing_token_owner,
             asset.key.clone(),
             &BaseAssetV1::from_bytes(&asset.data.borrow()).unwrap(),
             &mut unique_nft_mints,
