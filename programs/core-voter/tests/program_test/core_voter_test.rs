@@ -31,8 +31,6 @@ use crate::program_test::governance_test::{ProposalCookie, RealmCookie, TokenOwn
 use crate::program_test::program_test_bench::WalletCookie;
 use crate::program_test::tools::NopOverride;
 
-use super::core_test;
-
 #[derive(Debug, PartialEq)]
 pub struct RegistrarCookie {
     pub address: Pubkey,
@@ -100,7 +98,7 @@ impl CoreVoterTest {
 
     #[allow(dead_code)]
     pub async fn start_new() -> Self {
-        let mut program_test = ProgramTest::default();
+        let mut program_test = ProgramTest::new("gpl_core_voter", gpl_core_voter::id(), None);
 
         CoreVoterTest::add_program(&mut program_test);
         GovernanceTest::add_program(&mut program_test);
@@ -570,9 +568,7 @@ impl CoreVoterTest {
     ) -> Result<Vec<AssetVoteRecordCookie>, BanksClientError> {
         let args = args.unwrap_or_default();
 
-        let data = anchor_lang::InstructionData::data(&gpl_core_voter::instruction::CastNftVote {
-            proposal: proposal_cookie.address,
-        });
+        let data = anchor_lang::InstructionData::data(&gpl_core_voter::instruction::CastNftVote {});
 
         let accounts = gpl_core_voter::accounts::CastNftVote {
             registrar: registrar_cookie.address,
@@ -581,6 +577,7 @@ impl CoreVoterTest {
             voter_authority: asset_voter_cookie.address,
             payer: self.bench.payer.pubkey(),
             system_program: solana_sdk::system_program::id(),
+            proposal: proposal_cookie.address,
         };
 
         let mut account_metas = anchor_lang::ToAccountMetas::to_account_metas(&accounts, None);

@@ -7,7 +7,7 @@ use crate::{
 use anchor_lang::prelude::*;
 use mpl_core::{accounts::BaseAssetV1, types::UpdateAuthority};
 use solana_program::pubkey::PUBKEY_BYTES;
-use spl_governance::state::token_owner_record;
+use spl_governance::state::{enums::ProposalState, proposal, token_owner_record};
 
 /// Registrar which stores NFT voting configuration for the given Realm
 #[account]
@@ -92,6 +92,22 @@ pub fn resolve_governing_token_owner(
     );
 
     Ok(voter_token_owner_record.governing_token_owner)
+}
+
+/// Resolves proposal account
+pub fn resolve_proposal_account(
+    registrar: &Registrar,
+    proposal_info: &AccountInfo,
+) -> Result<Pubkey> {
+    let proposal_data = proposal::get_proposal_data(
+        &registrar.governance_program_id, proposal_info
+    )?;
+
+    if proposal_data.state != ProposalState::Voting {
+        return Err(NftVoterError::InvalidProposalState.into());
+    }
+
+    Ok(proposal_info.key())
 }
 
 /// Resolves vote weight and voting mint for the given NFT

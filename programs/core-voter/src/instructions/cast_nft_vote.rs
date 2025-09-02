@@ -43,6 +43,9 @@ pub struct CastNftVote<'info> {
     /// It can be either governing_token_owner or its delegate and must sign this instruction
     pub voter_authority: Signer<'info>,
 
+    /// CHECK: The account is validated in the instruction
+    proposal: UncheckedAccount<'info>,
+
     /// The account which pays for the transaction
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -52,10 +55,10 @@ pub struct CastNftVote<'info> {
 
 /// Casts vote with the NFT
 pub fn cast_nft_vote<'a, 'b, 'c, 'info>(
-    ctx: Context<'a, 'b, 'c, 'info, CastNftVote<'info>>,
-    proposal: Pubkey,
+    ctx: Context<'a, 'b, 'c, 'info, CastNftVote<'info>>
 ) -> Result<()> {
     let registrar = &ctx.accounts.registrar;
+    let proposal = &ctx.accounts.proposal;
     let voter_weight_record = &mut ctx.accounts.voter_weight_record;
 
     let governing_token_owner = resolve_governing_token_owner(
@@ -63,6 +66,11 @@ pub fn cast_nft_vote<'a, 'b, 'c, 'info>(
         &ctx.accounts.voter_token_owner_record,
         &ctx.accounts.voter_authority,
         voter_weight_record,
+    )?;
+
+    let proposal_key = resolve_proposal_account(
+        registrar,
+        proposal,
     )?;
 
     let mut voter_weight = 0u64;
@@ -105,7 +113,7 @@ pub fn cast_nft_vote<'a, 'b, 'c, 'info>(
         // for the voting population and the tokens of that mint are no longer used
         let asset_vote_record = AssetVoteRecord {
             account_discriminator: AssetVoteRecord::ACCOUNT_DISCRIMINATOR,
-            proposal,
+            proposal: proposal_key,
             asset_mint,
             governing_token_owner,
             reserved: [0; 8],
@@ -117,7 +125,7 @@ pub fn cast_nft_vote<'a, 'b, 'c, 'info>(
             &ctx.accounts.payer.to_account_info(),
             asset_vote_record_info,
             &asset_vote_record,
-            &get_nft_vote_record_seeds(&proposal, &asset_mint),
+            &get_nft_vote_record_seeds(&proposal_key, &asset_mint),
             &id(),
             &ctx.accounts.system_program.to_account_info(),
             &rent,
@@ -125,7 +133,7 @@ pub fn cast_nft_vote<'a, 'b, 'c, 'info>(
         )?;
     }
 
-    if voter_weight_record.weight_action_target == Some(proposal)
+    if voter_weight_record.weight_action_target == Some(proposal_key)
         && voter_weight_record.weight_action == Some(VoterWeightAction::CastVote)
     {
         // If cast_nft_vote is called for the same proposal then we keep accumulating the weight
@@ -143,7 +151,7 @@ pub fn cast_nft_vote<'a, 'b, 'c, 'info>(
 
     // The record is only valid for casting vote on the given Proposal
     voter_weight_record.weight_action = Some(VoterWeightAction::CastVote);
-    voter_weight_record.weight_action_target = Some(proposal);
+    voter_weight_record.weight_action_target = Some(proposal_key);
 
     Ok(())
 }

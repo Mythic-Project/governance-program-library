@@ -79,4 +79,7 @@ pub enum NftVoterError {
 
     #[msg("Invalid NFT collection")]
     InvalidNftCollection,
+
+    #[msg("Proposal is not in voting state")]
+    InvalidProposalState,
 }

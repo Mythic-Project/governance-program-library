@@ -56,10 +56,9 @@ pub mod core_voter {
 
     pub fn cast_nft_vote<'a, 'b, 'c, 'info>(
         ctx: Context<'a, 'b, 'c, 'info, CastNftVote<'info>>,
-        proposal: Pubkey,
     ) -> Result<()> {
         log_version();
-        instructions::cast_nft_vote(ctx, proposal)
+        instructions::cast_nft_vote(ctx)
     }
 }
 
