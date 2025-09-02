@@ -50,6 +50,10 @@ pub fn update_voter_weight_record(
     let mut unique_nft_mints = vec![];
 
     for asset in ctx.remaining_accounts.iter() {
+        if asset.owner != &mpl_core::ID {
+            return Err(NftVoterError::InvalidAccountOwner.into());
+        }
+
         let (nft_vote_weight, _) = resolve_nft_vote_weight_and_mint(
             registrar,
             governing_token_owner,

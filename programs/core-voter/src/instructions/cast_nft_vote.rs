@@ -75,6 +75,10 @@ pub fn cast_nft_vote<'a, 'b, 'c, 'info>(
     for (asset, asset_vote_record_info) in
         ctx.remaining_accounts.iter().tuples()
     {
+        if asset.owner != &mpl_core::ID {
+            return Err(NftVoterError::InvalidAccountOwner.into());
+        }
+
         let (asset_vote_weight, asset_mint) = resolve_nft_vote_weight_and_mint(
             registrar,
             &governing_token_owner,

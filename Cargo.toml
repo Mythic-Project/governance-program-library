@@ -6,7 +6,7 @@ members = [
     "programs/nft-voter",
     "programs/bonk-plugin",
     "programs/token-haver",
-    "programs/core-voter"
+    "programs/core-voter",
     "programs/token-voter"
 ]
 
