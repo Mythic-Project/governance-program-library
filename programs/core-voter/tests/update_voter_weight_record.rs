@@ -26,10 +26,18 @@ async fn test_update_voter_weight_record() -> Result<(), TransportError> {
 
     let voter_cookie = core_voter_test.bench.with_wallet().await;
 
+    let voter_token_owner_record_cookie = core_voter_test
+        .governance
+        .with_token_owner_record(&realm_cookie, &voter_cookie)
+        .await?;
+
     let asset_cookie1 = core_voter_test
         .core
         .create_asset(&collection_cookie, &voter_cookie)
         .await?;
+
+    let voter_cookie = core_voter_test.bench.with_wallet().await;
+
 
     msg!("Register the collection to the registrar");
     // Register the collection to the registrar
@@ -55,7 +63,9 @@ async fn test_update_voter_weight_record() -> Result<(), TransportError> {
             &registrar_cookie,
             &mut voter_weight_record_cookie,
             VoterWeightAction::CreateProposal,
-            &[&asset_cookie1],
+            &voter_cookie,
+            &voter_token_owner_record_cookie,
+            &[&asset_cookie1]
         )
         .await?;
 
@@ -117,6 +127,11 @@ async fn test_update_voter_weight_with_multiple_nfts() -> Result<(), TransportEr
         .with_voter_weight_record(&registrar_cookie, &voter_cookie)
         .await?;
 
+    let voter_token_owner_record_cookie = core_voter_test
+        .governance
+        .with_token_owner_record(&realm_cookie, &voter_cookie)
+        .await?;
+
     core_voter_test.bench.advance_clock().await;
     let clock = core_voter_test.bench.get_clock().await;
 
@@ -126,6 +141,8 @@ async fn test_update_voter_weight_with_multiple_nfts() -> Result<(), TransportEr
             &registrar_cookie,
             &mut voter_weight_record_cookie,
             VoterWeightAction::CreateProposal,
+            &voter_cookie,
+            &voter_token_owner_record_cookie,
             &[&asset_cookie1, &asset_cookie2],
         )
         .await?;
@@ -182,12 +199,19 @@ async fn test_update_voter_weight_with_cast_vote_not_allowed_error() -> Result<(
         .with_voter_weight_record(&registrar_cookie, &voter_cookie)
         .await?;
 
+    let voter_token_owner_record_cookie = core_voter_test
+        .governance
+        .with_token_owner_record(&realm_cookie, &voter_cookie)
+        .await?;
+
     // Act
     let err = core_voter_test
         .update_voter_weight_record(
             &registrar_cookie,
             &mut voter_weight_record_cookie,
             VoterWeightAction::CastVote,
+            &voter_cookie,
+            &voter_token_owner_record_cookie,
             &[&asset_cookie1],
         )
         .await
@@ -237,12 +261,19 @@ async fn test_update_voter_weight_with_invalid_owner_error() -> Result<(), Trans
         .with_voter_weight_record(&registrar_cookie, &voter_cookie)
         .await?;
 
+    let voter_token_owner_record_cookie = core_voter_test
+        .governance
+        .with_token_owner_record(&realm_cookie, &voter_cookie)
+        .await?;
+
     // Act
     let err = core_voter_test
         .update_voter_weight_record(
             &registrar_cookie,
             &mut voter_weight_record_cookie,
             VoterWeightAction::CreateGovernance,
+            &voter_cookie,
+            &voter_token_owner_record_cookie,
             &[&asset_cookie1],
         )
         .await
@@ -297,12 +328,19 @@ async fn test_update_voter_weight_with_invalid_collection_error() -> Result<(), 
         .with_voter_weight_record(&registrar_cookie, &voter_cookie)
         .await?;
 
+    let voter_token_owner_record_cookie = core_voter_test
+        .governance
+        .with_token_owner_record(&realm_cookie, &voter_cookie)
+        .await?;
+
     // Act
     let err = core_voter_test
         .update_voter_weight_record(
             &registrar_cookie,
             &mut voter_weight_record_cookie,
             VoterWeightAction::CreateGovernance,
+            &voter_cookie,
+            &voter_token_owner_record_cookie,
             &[&asset_cookie1],
         )
         .await
@@ -350,12 +388,19 @@ async fn test_update_voter_weight_with_same_nft_error() -> Result<(), TransportE
         .with_voter_weight_record(&registrar_cookie, &voter_cookie)
         .await?;
 
+    let voter_token_owner_record_cookie = core_voter_test
+        .governance
+        .with_token_owner_record(&realm_cookie, &voter_cookie)
+        .await?;
+
     // Act
     let err = core_voter_test
         .update_voter_weight_record(
             &registrar_cookie,
             &mut voter_weight_record_cookie,
             VoterWeightAction::CreateProposal,
+            &voter_cookie,
+            &voter_token_owner_record_cookie,
             &[&asset_cookie, &asset_cookie],
         )
         .await

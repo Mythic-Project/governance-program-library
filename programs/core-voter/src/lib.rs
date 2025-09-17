@@ -11,7 +11,7 @@ pub mod tools;
 
 use crate::state::*;
 
-declare_id!("Gcore62Vw7rfgmXMG8T7B9Ye2smpE35rk12RxkuMNc6a");
+declare_id!("cNFTHBQuERFVrbmks1UzqFQPBHzquRmoLbmgpHBbczF");
 
 #[program]
 pub mod core_voter {

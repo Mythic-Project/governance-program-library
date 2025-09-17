@@ -377,6 +377,8 @@ impl CoreVoterTest {
         registrar_cookie: &RegistrarCookie,
         voter_weight_record_cookie: &mut VoterWeightRecordCookie,
         voter_weight_action: VoterWeightAction,
+        asset_voter_cookie: &WalletCookie,
+        voter_token_owner_record_cookie: &TokenOwnerRecordCookie,
         asset_cookies: &[&AssetCookie],
     ) -> Result<(), BanksClientError> {
         let data = anchor_lang::InstructionData::data(
@@ -388,6 +390,8 @@ impl CoreVoterTest {
         let accounts = gpl_core_voter::accounts::UpdateVoterWeightRecord {
             registrar: registrar_cookie.address,
             voter_weight_record: voter_weight_record_cookie.address,
+            voter_token_owner_record: voter_token_owner_record_cookie.address,
+            voter_authority: asset_voter_cookie.address,
         };
 
         let mut account_metas = anchor_lang::ToAccountMetas::to_account_metas(&accounts, None);
