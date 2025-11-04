@@ -7,7 +7,8 @@ members = [
     "programs/bonk-plugin",
     "programs/token-haver",
     "programs/core-voter",
-    "programs/token-voter"
+    "programs/token-voter",
+    "programs/dual-token-voter"
 ]
 
 resolver = "2"

@@ -1879,6 +1879,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpl-dual-token-voter"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "arrayref",
+ "bitflags 2.6.0",
+ "borsh 0.10.3",
+ "bytemuck",
+ "gpl-shared",
+ "solana-program-test",
+ "solana-sdk",
+ "spl-associated-token-account 3.0.4",
+ "spl-governance",
+ "spl-governance-addin-api",
+ "spl-governance-tools",
+ "spl-token",
+ "spl-token-2022 3.0.4",
+]
+
+[[package]]
 name = "gpl-nft-voter"
 version = "0.2.3"
 dependencies = [
@@ -3243,9 +3264,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.86"
+version = "1.0.94"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77"
+checksum = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84"
 dependencies = [
  "unicode-ident",
 ]
