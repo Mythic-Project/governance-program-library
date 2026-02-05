@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "programs/gateway",
     "programs/quadratic",
+    "lib/shared",
     "programs/realm-voter",
     "programs/nft-voter",
     "programs/bonk-plugin",
@@ -11,6 +11,59 @@ members = [
 ]
 
 resolver = "2"
+
+[workspace.dependencies]
+# Anchor
+anchor-lang = "0.31.1"
+anchor-spl = "0.31.1"
+
+# Solana (compatible with Anchor 0.31.1)
+# Pinned to =2.2.1 to avoid solana-clock / solana-runtime version mismatch
+solana-sdk = "=2.2.1"
+solana-program-test = "=2.2.1"
+solana-program = "=2.2.1"
+solana-zk-sdk = "=2.2.1"
+solana-instruction = "=2.2.1"
+
+# SPL (compatible with Anchor 0.31.1)
+spl-governance = { package = "spl-governance-mythic", version = "3.1.2" }
+spl-governance-tools = { package = "spl-governance-tools-mythic", version = "0.1.6" }
+spl-governance-addin-api = { package = "spl-governance-addin-api-mythic", version = "0.1.6" }
+spl-governance-addin-mock = { package = "spl-governance-addin-mock-mythic", version = "0.1.6" }
+spl-token = "6"
+spl-token-2022 = { version = "8.0.1", features = ["no-entrypoint"] }
+spl-token-client = "0.14"
+spl-associated-token-account = "4"
+spl-tlv-account-resolution = "0.10"
+spl-transfer-hook-interface = "0.10"
+
+
+# Other dependencies
+arrayref = "0.3.7"
+borsh = "0.10.3"
+borsh_1 = { package = "borsh", version = "1" }
+ahash = "=0.8.11"
+static_assertions = "1.1"
+itertools = { version = "0.12.0", default-features = false }
+itertools-10 = { package = "itertools", version = "0.10" }
+enum_dispatch = "0.3.8"
+num = "0.4"
+num-derive = "0.4.1"
+num-traits = "0.2"
+log = "0.4.14"
+env_logger = "0.9.0"
+bytemuck = "1.7"
+
+# Internal crates
+gpl-shared = { path = "lib/shared" }
+
+# External programs
+mpl-token-metadata = "5.1.1"
+mpl-core = "0.11.1"
+
+[workspace.lints.rust.unexpected_cfgs]
+level = "warn"
+check-cfg = ['cfg(feature, values("custom-heap", "custom-panic", "anchor-debug"))']
 
 [profile.release]
 overflow-checks = true

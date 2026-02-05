@@ -2,7 +2,7 @@ use {
     super::{DepositEntry, Registrar},
     crate::error::TokenVoterError,
     anchor_lang::{prelude::*, Discriminator},
-    solana_program::pubkey::PUBKEY_BYTES,
+    anchor_lang::solana_program::pubkey::PUBKEY_BYTES,
     spl_governance::state::token_owner_record,
 };
 
@@ -33,7 +33,7 @@ const_assert!(std::mem::size_of::<Voter>() % 8 == 0);
 
 impl Voter {
     pub fn get_space(max_mints: u8) -> usize {
-        Voter::discriminator().len() + PUBKEY_BYTES * 2 + (max_mints as usize * 64) + 1 + 1 + 94
+        Voter::DISCRIMINATOR.len() + PUBKEY_BYTES * 2 + (max_mints as usize * 64) + 1 + 1 + 94
     }
 
     pub fn clock_unix_timestamp(&self) -> i64 {

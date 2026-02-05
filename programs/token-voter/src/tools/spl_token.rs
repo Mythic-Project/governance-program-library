@@ -4,7 +4,7 @@ use {
     crate::error::TokenVoterError,
     anchor_lang::prelude::*,
     arrayref::array_ref,
-    solana_program::{
+    anchor_lang::solana_program::{
         entrypoint::ProgramResult,
         msg,
         program::{invoke, invoke_signed},

@@ -6,7 +6,7 @@ use crate::{
 };
 use anchor_lang::prelude::*;
 use mpl_core::{accounts::BaseAssetV1, types::UpdateAuthority};
-use solana_program::pubkey::PUBKEY_BYTES;
+use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 use spl_governance::state::{enums::ProposalState, proposal, token_owner_record};
 
 /// Registrar which stores NFT voting configuration for the given Realm

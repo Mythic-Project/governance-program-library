@@ -69,7 +69,7 @@ async fn test_deposit_entry_with_token_extension() -> Result<(), TransportError>
         voter_data.deposits.first().unwrap().amount_deposited_native,
         amount_deposited
     );
-    assert_eq!(voter_data.deposits.len(), 1);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 1);
 
     let registrar = token_voter_test
         .get_registrar_account(&registrar_cookie.address)
@@ -201,7 +201,7 @@ async fn test_deposit_entry_with_token_extension_transfer_hooks() -> Result<(), 
         voter_data.deposits.first().unwrap().amount_deposited_native,
         amount_deposited
     );
-    assert_eq!(voter_data.deposits.len(), 1);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 1);
 
     let registrar = token_voter_test
         .get_registrar_account(&registrar_cookie.address)
@@ -372,7 +372,7 @@ async fn test_deposit_entry() -> Result<(), TransportError> {
         voter_data.deposits.first().unwrap().amount_deposited_native,
         amount_deposited
     );
-    assert_eq!(voter_data.deposits.len(), 1);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 1);
 
     let registrar = token_voter_test
         .get_registrar_account(&registrar_cookie.address)
@@ -507,7 +507,7 @@ async fn test_deposit_entry_multi_deposit() -> Result<(), TransportError> {
         first_deposit_entry.amount_deposited_native,
         amount_deposited * 3
     );
-    assert_eq!(voter_data.deposits.len(), 1);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 1);
 
     let registrar = token_voter_test
         .get_registrar_account(&registrar_cookie.address)
@@ -631,7 +631,7 @@ async fn test_deposit_entry_multi_token() -> Result<(), TransportError> {
         second_deposit_entry.amount_deposited_native,
         amount_deposited
     );
-    assert_eq!(voter_data.deposits.len(), 2);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 2);
 
     let first_vault_balance = token_voter_test
         .vault_balance(&voter_cookie, &first_mint_cookie, &spl_token::id())

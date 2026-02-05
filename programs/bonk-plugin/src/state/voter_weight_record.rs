@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use gpl_shared::compose::VoterWeightRecordBase;
-use solana_program::pubkey::PUBKEY_BYTES;
+use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 
 use crate::utils::anchor::DISCRIMINATOR_SIZE;
 

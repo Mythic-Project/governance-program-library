@@ -13,7 +13,7 @@ use crate::program_test::governance_test::GovernanceTest;
 use crate::program_test::program_test_bench::ProgramTestBench;
 use anchor_lang::ToAccountMetas;
 use solana_program::program_pack::Pack;
-use solana_program_test::{processor, BanksClientError, ProgramTest};
+use solana_program_test::{BanksClientError, ProgramTest};
 use solana_sdk::instruction::Instruction;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::Signer;
@@ -132,7 +132,7 @@ impl TokenVoterTest {
             program_test.add_program(
                 "spl_transfer_hook_example",
                 *transfer_hook_program_id.unwrap(),
-                processor!(spl_transfer_hook_example::processor::process),
+                None,
             );
         };
 

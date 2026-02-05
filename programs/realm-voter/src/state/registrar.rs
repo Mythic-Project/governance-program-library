@@ -1,6 +1,6 @@
 use crate::{id, state::GovernanceProgramConfig, tools::anchor::DISCRIMINATOR_SIZE};
 use anchor_lang::prelude::*;
-use solana_program::pubkey::PUBKEY_BYTES;
+use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 
 /// Enum defining collection item change type
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Eq, PartialEq, Debug)]

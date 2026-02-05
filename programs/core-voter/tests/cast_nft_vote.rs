@@ -251,7 +251,9 @@ async fn test_cast_asset_vote_with_nft_already_voted_error() -> Result<(), Trans
             &voter_cookie,
             &voter_token_owner_record_cookie,
             &[&asset_cookie1],
-            None,
+            Some(CastAssetVoteArgs {
+                cast_spl_gov_vote: false,
+            }),
         )
         .await?;
 
@@ -267,7 +269,9 @@ async fn test_cast_asset_vote_with_nft_already_voted_error() -> Result<(), Trans
             &voter_cookie,
             &voter_token_owner_record_cookie,
             &[&asset_cookie1],
-            None,
+            Some(CastAssetVoteArgs {
+                cast_spl_gov_vote: false,
+            }),
         )
         .await
         .err()

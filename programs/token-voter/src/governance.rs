@@ -39,9 +39,9 @@ macro_rules! vote_weight_record {
             fn try_deserialize(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
                 let mut data = buf;
                 let vwr: spl_governance_addin_api::voter_weight::VoterWeightRecord =
-                    anchor_lang::AnchorDeserialize::deserialize(&mut data)
+                    borsh_1::BorshDeserialize::deserialize(&mut data)
                         .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize)?;
-                if !solana_program::program_pack::IsInitialized::is_initialized(&vwr) {
+                if !anchor_lang::solana_program::program_pack::IsInitialized::is_initialized(&vwr) {
                     return Err(anchor_lang::error::ErrorCode::AccountDidNotSerialize.into());
                 }
                 Ok(VoterWeightRecord(vwr))
@@ -50,7 +50,7 @@ macro_rules! vote_weight_record {
             fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
                 let mut data = buf;
                 let vwr: spl_governance_addin_api::voter_weight::VoterWeightRecord =
-                    anchor_lang::AnchorDeserialize::deserialize(&mut data)
+                    borsh_1::BorshDeserialize::deserialize(&mut data)
                         .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize)?;
                 Ok(VoterWeightRecord(vwr))
             }
@@ -58,7 +58,7 @@ macro_rules! vote_weight_record {
 
         impl anchor_lang::AccountSerialize for VoterWeightRecord {
             fn try_serialize<W: std::io::Write>(&self, writer: &mut W) -> anchor_lang::Result<()> {
-                anchor_lang::AnchorSerialize::serialize(&self.0, writer)
+                borsh_1::BorshSerialize::serialize(&self.0, writer)
                     .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotSerialize)?;
                 Ok(())
             }
@@ -89,10 +89,7 @@ macro_rules! vote_weight_record {
 
         #[cfg(feature = "idl-build")]
         impl anchor_lang::Discriminator for VoterWeightRecord {
-            const DISCRIMINATOR: [u8; 8] = [0; 8];
-            fn discriminator() -> [u8; 8] {
-                spl_governance_addin_api::voter_weight::VoterWeightRecord::ACCOUNT_DISCRIMINATOR
-            }
+            const DISCRIMINATOR: &'static [u8] = &spl_governance_addin_api::voter_weight::VoterWeightRecord::ACCOUNT_DISCRIMINATOR;
         }
     };
 }
@@ -114,7 +111,7 @@ macro_rules! max_voter_weight_record {
                 realm: Pubkey,
                 governing_token_mint: Pubkey,
                 max_voter_weight: u64,
-                max_voter_weight_expiry: Option<solana_program::clock::Slot>,
+                max_voter_weight_expiry: Option<anchor_lang::solana_program::clock::Slot>,
             ) -> Self {
                 let mvwr = spl_governance_addin_api::max_voter_weight::MaxVoterWeightRecord {
                     account_discriminator: spl_governance_addin_api::max_voter_weight::MaxVoterWeightRecord::ACCOUNT_DISCRIMINATOR,
@@ -157,9 +154,9 @@ macro_rules! max_voter_weight_record {
             fn try_deserialize(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
                 let mut data = buf;
                 let mvwr: spl_governance_addin_api::max_voter_weight::MaxVoterWeightRecord =
-                    anchor_lang::AnchorDeserialize::deserialize(&mut data)
+                    borsh_1::BorshDeserialize::deserialize(&mut data)
                         .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize)?;
-                if !solana_program::program_pack::IsInitialized::is_initialized(&mvwr) {
+                if !anchor_lang::solana_program::program_pack::IsInitialized::is_initialized(&mvwr) {
                     return Err(anchor_lang::error::ErrorCode::AccountDidNotSerialize.into());
                 }
                 Ok(MaxVoterWeightRecord(mvwr))
@@ -168,7 +165,7 @@ macro_rules! max_voter_weight_record {
             fn try_deserialize_unchecked(buf: &mut &[u8]) -> anchor_lang::Result<Self> {
                 let mut data = buf;
                 let mvwr: spl_governance_addin_api::max_voter_weight::MaxVoterWeightRecord =
-                    anchor_lang::AnchorDeserialize::deserialize(&mut data)
+                    borsh_1::BorshDeserialize::deserialize(&mut data)
                         .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotDeserialize)?;
                 Ok(MaxVoterWeightRecord(mvwr))
             }
@@ -176,7 +173,7 @@ macro_rules! max_voter_weight_record {
 
         impl anchor_lang::AccountSerialize for MaxVoterWeightRecord {
             fn try_serialize<W: std::io::Write>(&self, writer: &mut W) -> anchor_lang::Result<()> {
-                anchor_lang::AnchorSerialize::serialize(&self.0, writer)
+                borsh_1::BorshSerialize::serialize(&self.0, writer)
                     .map_err(|_| anchor_lang::error::ErrorCode::AccountDidNotSerialize)?;
                 Ok(())
             }
@@ -207,10 +204,7 @@ macro_rules! max_voter_weight_record {
 
         #[cfg(feature = "idl-build")]
         impl anchor_lang::Discriminator for MaxVoterWeightRecord {
-            const DISCRIMINATOR: [u8; 8] = [0; 8];
-            fn discriminator() -> [u8; 8] {
-                spl_governance_addin_api::max_voter_weight::MaxVoterWeightRecord::ACCOUNT_DISCRIMINATOR
-            }
+            const DISCRIMINATOR: &'static [u8] = &spl_governance_addin_api::max_voter_weight::MaxVoterWeightRecord::ACCOUNT_DISCRIMINATOR;
         }
     };
 }

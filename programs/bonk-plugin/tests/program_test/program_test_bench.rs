@@ -8,8 +8,7 @@ use anchor_spl::associated_token::{
     get_associated_token_address,
     spl_associated_token_account::instruction::create_associated_token_account,
 };
-#[allow(deprecated)]
-use solana_program::{borsh::try_from_slice_unchecked, system_program};
+use solana_program::system_program;
 use solana_program_test::{BanksClientError, ProgramTest, ProgramTestContext};
 use solana_sdk::{
     account::{Account, ReadableAccount},
@@ -21,8 +20,6 @@ use solana_sdk::{
     transaction::Transaction,
     transport::TransportError,
 };
-
-use borsh::BorshDeserialize;
 
 use crate::program_test::tools::clone_keypair;
 
@@ -289,11 +286,10 @@ impl ProgramTestBench {
     }
 
     #[allow(dead_code)]
-    pub async fn get_borsh_account<T: BorshDeserialize>(&self, address: &Pubkey) -> T {
-        #[allow(deprecated)]
+    pub async fn get_borsh_account<T: borsh_1::BorshDeserialize>(&self, address: &Pubkey) -> T {
         self.get_account(address)
             .await
-            .map(|a| try_from_slice_unchecked(&a.data).unwrap())
+            .map(|a| borsh_1::BorshDeserialize::deserialize(&mut a.data.as_slice()).unwrap())
             .unwrap_or_else(|| panic!("GET-TEST-ACCOUNT-ERROR: Account {} not found", address))
     }
 

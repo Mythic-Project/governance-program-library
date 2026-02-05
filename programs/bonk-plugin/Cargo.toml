@@ -17,17 +17,21 @@ no-log-ix-name = []
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 
 [dependencies]
-anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
-anchor-spl = "=0.30.1"
-spl-governance = { version = "4.0.0", features = ["no-entrypoint"] }
-spl-governance-tools =  "0.1.4"
-solana-program = "1.18.18"
-itertools = "0.10.2"
-gpl-shared = { path = "../shared", features = ["no-entrypoint"] }
-spl-token = { version = "4.0.0", features = [ "no-entrypoint" ] }
+anchor-lang = { workspace = true, features = ["init-if-needed"] }
+anchor-spl = { workspace = true }
+spl-governance = { workspace = true, features = ["no-entrypoint"] }
+spl-governance-tools = { workspace = true }
+itertools = { workspace = true }
+gpl-shared = { workspace = true, features = ["no-entrypoint"] }
+spl-token = { workspace = true, features = ["no-entrypoint"] }
 
 [dev-dependencies]
-borsh = "0.10.3"
-solana-sdk = "1.18.18"
-solana-program-test = "1.18.18"
-bytemuck = { version = "1.7", features = ["derive"] }
+borsh = { workspace = true }
+borsh_1 = { workspace = true }
+solana-program = { workspace = true }
+solana-sdk = { workspace = true }
+solana-program-test = { workspace = true }
+bytemuck = { workspace = true, features = ["derive"] }
+
+[lints]
+workspace = true

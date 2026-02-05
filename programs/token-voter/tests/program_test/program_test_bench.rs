@@ -6,12 +6,10 @@ use std::cell::RefCell;
 use std::convert::TryInto;
 
 use anchor_spl::associated_token;
-use borsh::BorshDeserialize;
 use solana_program::system_program;
 use solana_program_test::{BanksClientError, ProgramTest, ProgramTestContext};
 use solana_sdk::{
     account::{Account, ReadableAccount},
-    borsh1::try_from_slice_unchecked,
     instruction::{AccountMeta, Instruction},
     program_option::COption,
     program_pack::Pack,
@@ -462,11 +460,11 @@ impl ProgramTestBench {
                 transfer_fee_basis_points,
                 maximum_fee,
             }];
-        let extension_types = extension_initialization_params
+        let extension_types: Vec<_> = extension_initialization_params
             .iter()
             .map(|e| e.extension())
-            .collect::<Vec<_>>();
-        let space = ExtensionType::try_calculate_account_len::<spl_token_2022::state::Mint>(
+            .collect();
+        let space = spl_token_client::spl_token_2022::extension::ExtensionType::try_calculate_account_len::<spl_token_client::spl_token_2022::state::Mint>(
             &extension_types,
         )
         .unwrap();
@@ -710,11 +708,11 @@ impl ProgramTestBench {
             program_id: Some(*program_id),
         }];
 
-        let extension_types = extension_initialization_params
+        let extension_types: Vec<_> = extension_initialization_params
             .iter()
             .map(|e| e.extension())
-            .collect::<Vec<_>>();
-        let space = ExtensionType::try_calculate_account_len::<spl_token_2022::state::Mint>(
+            .collect();
+        let space = spl_token_client::spl_token_2022::extension::ExtensionType::try_calculate_account_len::<spl_token_client::spl_token_2022::state::Mint>(
             &extension_types,
         )
         .unwrap();
@@ -1056,17 +1054,13 @@ impl ProgramTestBench {
     }
 
     #[allow(dead_code)]
-    pub async fn get_borsh_account<
-        T: BorshDeserialize
-            + anchor_spl::token_2022_extensions::spl_token_metadata_interface::borsh::BorshDeserialize,
-    >(
+    pub async fn get_borsh_account<T: borsh_1::BorshDeserialize>(
         &self,
         address: &Pubkey,
     ) -> T {
-        #[allow(deprecated)]
         self.get_account(address)
             .await
-            .map(|a| try_from_slice_unchecked(&a.data).unwrap())
+            .map(|a| borsh_1::BorshDeserialize::deserialize(&mut a.data.as_slice()).unwrap())
             .unwrap_or_else(|| panic!("GET-TEST-ACCOUNT-ERROR: Account {} not found", address))
     }
 

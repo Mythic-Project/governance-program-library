@@ -1,13 +1,13 @@
 [package]
-name = "gpl-quadratic"
+name = "gpl-shared"
 version = "0.1.1"
-description = "SPL Governance quadratic voting plugin"
+description = "SPL Governance plugin shared code"
 license = "Apache-2.0"
 edition = "2018"
 
 [lib]
-crate-type = ["cdylib", "lib"]
-name = "gpl_quadratic"
+crate-type = ["lib"]
+name = "gpl_shared"
 
 [features]
 no-entrypoint = []
@@ -15,16 +15,11 @@ no-idl = []
 no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
-idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+idl-build = ["anchor-lang/idl-build"]
 
 [dependencies]
-arrayref = { workspace = true }
 anchor-lang = { workspace = true, features = ["init-if-needed"] }
-anchor-spl = { workspace = true }
 enum_dispatch = { workspace = true }
-gpl-shared = { workspace = true, features = ["no-entrypoint"] }
-itertools = { workspace = true }
-num = { workspace = true }
 num-derive = { workspace = true }
 num-traits = { workspace = true }
 spl-governance = { workspace = true, features = ["no-entrypoint"] }
@@ -33,12 +28,6 @@ spl-governance-addin-api = { workspace = true }
 spl-token = { workspace = true, features = ["no-entrypoint"] }
 
 [dev-dependencies]
-borsh = { workspace = true }
-borsh_1 = { workspace = true }
-solana-program = { workspace = true }
-solana-sdk = { workspace = true }
-solana-program-test = { workspace = true }
-spl-governance-addin-mock = { workspace = true }
 
 [lints]
 workspace = true
