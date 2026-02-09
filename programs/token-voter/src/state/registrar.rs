@@ -4,7 +4,7 @@ use {
         vote_weight_record,
     },
     anchor_lang::{prelude::*, Discriminator},
-    solana_program::pubkey::PUBKEY_BYTES,
+    anchor_lang::solana_program::pubkey::PUBKEY_BYTES,
     spl_governance::state::token_owner_record,
 };
 
@@ -44,7 +44,7 @@ pub struct Registrar {
 impl Registrar {
     /// Returns Registrar size based on mints.
     pub fn get_space(max_mints: u8) -> usize {
-        Registrar::discriminator().len()
+        Registrar::DISCRIMINATOR.len()
             + PUBKEY_BYTES * 3
             + 4
             + max_mints as usize * (PUBKEY_BYTES + 1 + 63)
@@ -144,7 +144,7 @@ mod test {
         };
 
         // Act
-        let actual_space = Registrar::discriminator().len() + registrar.try_to_vec().unwrap().len();
+        let actual_space = Registrar::DISCRIMINATOR.len() + registrar.try_to_vec().unwrap().len();
 
         // Assert
         assert_eq!(expected_space, actual_space);

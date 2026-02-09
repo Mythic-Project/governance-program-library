@@ -8,7 +8,7 @@ use crate::{
     },
 };
 use anchor_lang::prelude::*;
-use solana_program::pubkey::PUBKEY_BYTES;
+use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 use spl_governance::state::token_owner_record;
 use spl_governance::tools::spl_token::{get_spl_token_mint, get_spl_token_owner};
 

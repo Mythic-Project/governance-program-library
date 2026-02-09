@@ -117,6 +117,8 @@ impl GovernanceTest {
             realm_name.clone(),
             min_community_weight_to_create_governance,
             community_mint_max_voter_weight_source.clone(),
+            false,
+            false,
         );
 
         self.bench
@@ -198,6 +200,7 @@ impl GovernanceTest {
             &self.bench.payer.pubkey(),
             1,
             &governing_token_mint,
+            false,
         );
 
         self.bench.process_transaction(&[deposit_ix], None).await?;

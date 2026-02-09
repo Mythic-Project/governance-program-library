@@ -18,18 +18,22 @@ default = []
 idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 
 [dependencies]
-arrayref = "0.3.6"
-anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
-anchor-spl = { version = "0.30.1", features = ["token"] }
-itertools = "0.10.2"
-mpl-token-metadata = "^4.1.2"
-mpl-core = {version = "0.7.1", features = ["anchor"]}
-solana-program = "1.18.18"
-spl-governance = { version = "4.0", features = ["no-entrypoint"] }
-spl-governance-tools =  "0.1.4"
-spl-token = { version = "4.0", features = [ "no-entrypoint" ] }
+arrayref = { workspace = true }
+anchor-lang = { workspace = true, features = ["init-if-needed"] }
+anchor-spl = { workspace = true, features = ["token"] }
+itertools = { workspace = true }
+mpl-token-metadata = { workspace = true }
+mpl-core = { workspace = true, features = ["anchor"] }
+spl-governance = { workspace = true, features = ["no-entrypoint"] }
+spl-governance-tools = { workspace = true }
+spl-token = { workspace = true, features = ["no-entrypoint"] }
+borsh_1 = { workspace = true }
 
 [dev-dependencies]
-borsh = "0.10.3"
-solana-sdk = "1.18.18"
-solana-program-test = "1.18.18"
+borsh = { workspace = true }
+solana-program = { workspace = true }
+solana-sdk = { workspace = true }
+solana-program-test = { workspace = true }
+
+[lints]
+workspace = true

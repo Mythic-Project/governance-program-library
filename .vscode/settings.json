@@ -9,5 +9,8 @@
     "Metas",
     "Pubkey",
     "solana"
-  ]
+  ],
+  "rust-analyzer.cargo.extraEnv": {
+    "OPENSSL_NO_VENDOR": "1"
+  }
 }

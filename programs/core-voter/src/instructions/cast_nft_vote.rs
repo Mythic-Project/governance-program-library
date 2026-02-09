@@ -17,7 +17,6 @@ use spl_governance_tools::account::create_and_serialize_account_signed;
 /// VoteChoice is recorded by spl-gov in VoteRecord and this CastNftVote only tracks voting NFTs
 ///
 #[derive(Accounts)]
-#[instruction(proposal: Pubkey)]
 pub struct CastNftVote<'info> {
     /// The NFT voting registrar
     pub registrar: Account<'info, Registrar>,

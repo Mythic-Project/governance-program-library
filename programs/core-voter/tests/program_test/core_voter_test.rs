@@ -406,7 +406,9 @@ impl CoreVoterTest {
             data,
         }];
 
-        self.bench.process_transaction(&instructions, None).await
+        self.bench
+            .process_transaction(&instructions, Some(&[&asset_voter_cookie.signer]))
+            .await
     }
 
     #[allow(dead_code)]

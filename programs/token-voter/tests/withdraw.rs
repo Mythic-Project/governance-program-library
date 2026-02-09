@@ -177,7 +177,7 @@ async fn test_withdraw_with_token_extensions_transfer_hooks() -> Result<(), Tran
         voter_data.deposits.first().unwrap().amount_deposited_native,
         0
     );
-    assert_eq!(voter_data.deposits.len(), 1);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 0);
 
     let first_vault_balance = token_voter_test
         .vault_balance(
@@ -276,7 +276,7 @@ async fn test_withdraw_with_token_extensions() -> Result<(), TransportError> {
         voter_data.deposits.first().unwrap().amount_deposited_native,
         0
     );
-    assert_eq!(voter_data.deposits.len(), 1);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 0);
 
     let first_vault_balance = token_voter_test
         .vault_balance(&voter_cookie, &first_mint_cookie, &spl_token_2022::id())
@@ -361,7 +361,7 @@ async fn test_withdraw() -> Result<(), TransportError> {
         voter_data.deposits.first().unwrap().amount_deposited_native,
         0
     );
-    assert_eq!(voter_data.deposits.len(), 1);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 0);
 
     Ok(())
 }
@@ -529,7 +529,7 @@ async fn test_withdraw_multi_deposit_and_withdraw() -> Result<(), TransportError
         voter_data.deposits.first().unwrap().amount_deposited_native,
         0
     );
-    assert_eq!(voter_data.deposits.len(), 1);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 0);
 
     Ok(())
 }

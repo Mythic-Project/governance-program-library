@@ -76,14 +76,14 @@ impl CoreTest {
             .process_transaction(&[create_coll_ix], Some(&[&coll_keypair]))
             .await?;
 
-        println!("Minting {} assets to collection", collection_size.unwrap());
-        if collection_size.is_some() {
+        if let Some(size) = collection_size {
+            println!("Minting {} assets to collection", size);
             self.mint_assets_to_collection(
                 &CollectionCookie {
                     collection: coll_keypair.pubkey(),
                     authority: coll_authority.insecure_clone(),
                 },
-                collection_size.unwrap(),
+                size,
             )
             .await;
         }

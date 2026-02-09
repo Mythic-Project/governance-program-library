@@ -41,7 +41,7 @@ async fn test_configure_voter_weights_with_token_extensions() -> Result<(), Tran
 
     let voter_data = token_voter_test.get_voter(&voter_cookie.address).await;
 
-    assert_eq!(voter_data.deposits.len(), 0);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 0);
     assert_eq!(voter_data.registrar, registrar_cookie.address);
 
     let registrar = token_voter_test
@@ -106,7 +106,7 @@ async fn test_configure_voter_weights() -> Result<(), TransportError> {
 
     let voter_data = token_voter_test.get_voter(&voter_cookie.address).await;
 
-    assert_eq!(voter_data.deposits.len(), 0);
+    assert_eq!(voter_data.deposits.iter().filter(|d| d.is_used).count(), 0);
     assert_eq!(voter_data.registrar, registrar_cookie.address);
 
     let registrar = token_voter_test

@@ -6,7 +6,6 @@ use {
         utils::stake_deposit_receipt::StakeDepositReceipt,
     },
     anchor_lang::prelude::*,
-    solana_program::pubkey::Pubkey,
     spl_governance::state::{governance, proposal, token_owner_record},
 };
 

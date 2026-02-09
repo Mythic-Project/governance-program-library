@@ -36,9 +36,6 @@ async fn test_update_voter_weight_record() -> Result<(), TransportError> {
         .create_asset(&collection_cookie, &voter_cookie)
         .await?;
 
-    let voter_cookie = core_voter_test.bench.with_wallet().await;
-
-
     msg!("Register the collection to the registrar");
     // Register the collection to the registrar
     let _collection_config_cookie = core_voter_test
@@ -304,10 +301,12 @@ async fn test_update_voter_weight_with_invalid_collection_error() -> Result<(), 
         .await?;
 
     let voter_cookie = core_voter_test.bench.with_wallet().await;
+    let dummy_wallet = core_voter_test.bench.with_wallet().await;
 
-    let _random_asset_cookie = core_voter_test
+    // Create a dummy asset in collection_cookie so it has size > 0 (required by configure_collection)
+    let _dummy_asset_cookie = core_voter_test
         .core
-        .create_asset(&collection_cookie2, &voter_cookie)
+        .create_asset(&collection_cookie, &dummy_wallet)
         .await?;
 
     let asset_cookie1 = core_voter_test

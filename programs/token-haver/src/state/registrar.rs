@@ -1,7 +1,7 @@
 use crate::{id, tools::anchor::DISCRIMINATOR_SIZE};
 use anchor_lang::prelude::*;
 use borsh::{BorshDeserialize, BorshSchema, BorshSerialize};
-use solana_program::pubkey::PUBKEY_BYTES;
+use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 
 /// Enum defining collection item change type
 #[derive(Clone, Debug, PartialEq, BorshDeserialize, BorshSerialize, BorshSchema)]

@@ -167,7 +167,7 @@ async fn test_cast_token_vote() -> Result<(), TransportError> {
         .await;
     let mut data_slice: &[u8] = &proposal_data;
     let proposal_state: spl_governance::state::proposal::ProposalV2 =
-        spl_governance::state::proposal::ProposalV2::deserialize(&mut data_slice).unwrap();
+        borsh_1::BorshDeserialize::deserialize(&mut data_slice).unwrap();
     assert_eq!(
         proposal_state.options[0].vote_weight,
         voter_weight_record.voter_weight
@@ -348,7 +348,7 @@ async fn test_cast_token_vote_token_extension() -> Result<(), TransportError> {
         .await;
     let mut data_slice: &[u8] = &proposal_data;
     let proposal_state: spl_governance::state::proposal::ProposalV2 =
-        spl_governance::state::proposal::ProposalV2::deserialize(&mut data_slice).unwrap();
+        borsh_1::BorshDeserialize::deserialize(&mut data_slice).unwrap();
     // println!("proposal_state: {:?}", proposal_state.options[0]);
     assert_eq!(
         proposal_state.options[0].vote_weight,
@@ -530,7 +530,7 @@ async fn test_cast_token_vote_token_extension_transfer_fees() -> Result<(), Tran
         .await;
     let mut data_slice: &[u8] = &proposal_data;
     let proposal_state: spl_governance::state::proposal::ProposalV2 =
-        spl_governance::state::proposal::ProposalV2::deserialize(&mut data_slice).unwrap();
+        borsh_1::BorshDeserialize::deserialize(&mut data_slice).unwrap();
 
     assert_eq!(
         proposal_state.options[0].vote_weight,
