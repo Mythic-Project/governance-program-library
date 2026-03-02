@@ -73,4 +73,13 @@ pub enum NftVoterError {
 
     #[msg("VoterWeightRecord must be expired")]
     VoterWeightRecordMustBeExpired,
+
+    #[msg("Invalid Sponsor for NftVoteRecord")]
+    InvalidSponsorForNftVoteRecord,
+
+    #[msg("Insufficient sponsor funds")]
+    InsufficientSponsorFunds,
+
+    #[msg("Invalid Sponsor Authority")]
+    InvalidSponsorAuthority,
 }

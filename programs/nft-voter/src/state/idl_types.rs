@@ -15,3 +15,19 @@ pub struct NftVoteRecord {
     /// It's a Realm member pubkey corresponding to TokenOwnerRecord.governing_token_owner
     pub governing_token_owner: Pubkey,
 }
+
+/// NftVoteRecordSponsored exported to IDL without account_discriminator
+#[account]
+pub struct NftVoteRecordSponsored {
+    /// Proposal which was voted on
+    pub proposal: Pubkey,
+
+    /// The mint of the NFT which was used for the vote
+    pub nft_mint: Pubkey,
+
+    /// The voter who casted this vote
+    pub governing_token_owner: Pubkey,
+
+    /// The sponsor account that paid for this record's rent
+    pub sponsor: Pubkey,
+}
