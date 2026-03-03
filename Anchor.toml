@@ -7,6 +7,7 @@ seeds = false
 [programs.localnet]
 # gateway = "GgathUhdrCWRHowoRKACjgWhYHfxCEdBi5ViqYN6HVxk" // deprecated support due to original program being not upgraded to latest solana version
 core-voter = "cNFTHBQuERFVrbmks1UzqFQPBHzquRmoLbmgpHBbczF"
+core-attribute-voter = "HmdGe7Sp7pcCr8bEmk4V35QTz5mWdDwV8pTRnWjDXaFA"
 nft_voter = "GnftV5kLjd67tvHpNGyodwWveEKivz3ZWvvE3Z4xi2iw"
 quadratic = "quadCSapU8nTdLg73KHDnmdxKnJQsh7GUbu5tZfnRRr"
 solana-gateway = "gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs"

@@ -1,0 +1,38 @@
+[package]
+name = "gpl-core-attribute-voter"
+version = "0.1.0"
+description = "SPL Governance addin implementing Metaplex Core NFT Asset attribute-based governance"
+license = "Apache-2.0"
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "gpl_core_attribute_voter"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+
+[dependencies]
+arrayref = { workspace = true }
+anchor-lang = { workspace = true, features = ["init-if-needed"] }
+anchor-spl = { workspace = true, features = ["token"] }
+itertools = { workspace = true }
+mpl-core = { workspace = true, features = ["anchor"] }
+spl-governance = { workspace = true, features = ["no-entrypoint"] }
+spl-governance-tools = { workspace = true }
+spl-token = { workspace = true, features = ["no-entrypoint"] }
+borsh_1 = { workspace = true }
+
+[dev-dependencies]
+borsh = { workspace = true }
+solana-program = { workspace = true }
+solana-sdk = { workspace = true }
+solana-program-test = { workspace = true }
+
+[lints]
+workspace = true
