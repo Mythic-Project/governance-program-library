@@ -52,6 +52,7 @@ pub fn configure_collection(
     weight_attribute_key: String,
     expected_attribute_authority: PluginAuthority,
 ) -> Result<()> {
+    let collection_key = ctx.accounts.collection.key();
     let registrar = &mut ctx.accounts.registrar;
 
     let realm = realm::get_realm_data_for_governing_token_mint(
@@ -65,33 +66,29 @@ pub fn configure_collection(
         CoreNftAttributeVoterError::InvalidRealmAuthority
     );
 
+    require!(
+        max_weight > 0,
+        CoreNftAttributeVoterError::InvalidMaxWeight
+    );
+
     // Validate weight_attribute_key
     require!(
         !weight_attribute_key.is_empty() && weight_attribute_key.len() <= 32,
         CoreNftAttributeVoterError::InvalidWeightAttributeKey
     );
 
-    let collection = &ctx.accounts.collection;
-
-    let size = collection.current_size;
-
-    msg!("Collection size: {}", size);
-
-    require!(size > 0, CoreNftAttributeVoterError::InvalidCollectionSize);
-
     let collection_config = CollectionConfig {
-        collection: collection.key(),
+        collection: collection_key,
         max_weight,
         weight_attribute_key,
         expected_attribute_authority,
         reserved: [0; 8],
-        size,
     };
 
     let collection_idx = registrar
         .collection_configs
         .iter()
-        .position(|cc| cc.collection == collection.key());
+        .position(|cc| cc.collection == collection_key);
 
     if let Some(collection_idx) = collection_idx {
         registrar.collection_configs[collection_idx] = collection_config;

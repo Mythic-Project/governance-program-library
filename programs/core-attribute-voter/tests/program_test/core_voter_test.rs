@@ -553,13 +553,8 @@ impl CoreVoterTest {
             .process_transaction(&[configure_collection_ix], Some(signers))
             .await?;
 
-        let collection_account = self
-            .get_collection_account(&collection_cookie.collection)
-            .await;
-
         let collection_config = CollectionConfig {
             collection: collection_cookie.collection,
-            size: collection_account.current_size,
             max_weight: args.max_weight,
             weight_attribute_key: args.weight_attribute_key,
             expected_attribute_authority: args.expected_attribute_authority,

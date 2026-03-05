@@ -62,8 +62,7 @@ async fn test_configure_collection() -> Result<(), TransportError> {
     assert_eq!(max_voter_weight_record.max_voter_weight_expiry, None);
     assert_eq!(
         max_voter_weight_record.max_voter_weight,
-        (registrar.collection_configs[0].max_weight as u32 * registrar.collection_configs[0].size)
-            as u64
+        registrar.collection_configs[0].max_weight
     );
 
     Ok(())
@@ -132,7 +131,7 @@ async fn test_configure_multiple_collections() -> Result<(), TransportError> {
         .await;
 
     assert_eq!(max_voter_weight_record.max_voter_weight_expiry, None);
-    assert_eq!(max_voter_weight_record.max_voter_weight, 25);
+    assert_eq!(max_voter_weight_record.max_voter_weight, 3);
 
     Ok(())
 }
@@ -182,7 +181,7 @@ async fn test_configure_max_collections() -> Result<(), TransportError> {
         .await;
 
     assert_eq!(max_voter_weight_record.max_voter_weight_expiry, None);
-    assert_eq!(max_voter_weight_record.max_voter_weight, 30);
+    assert_eq!(max_voter_weight_record.max_voter_weight, 10);
 
     Ok(())
 }
@@ -237,7 +236,7 @@ async fn test_configure_existing_collection() -> Result<(), TransportError> {
         .await;
 
     assert_eq!(max_voter_weight_record.max_voter_weight_expiry, None);
-    assert_eq!(max_voter_weight_record.max_voter_weight, 20);
+    assert_eq!(max_voter_weight_record.max_voter_weight, 2);
 
     Ok(())
 }

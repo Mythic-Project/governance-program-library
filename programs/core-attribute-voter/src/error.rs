@@ -9,8 +9,8 @@ pub enum CoreNftAttributeVoterError {
     #[msg("Invalid Realm for Registrar")]
     InvalidRealmForRegistrar,
 
-    #[msg("Invalid Collection Size")]
-    InvalidCollectionSize,
+    #[msg("Invalid max weight, must be greater than 0")]
+    InvalidMaxWeight,
 
     #[msg("Invalid MaxVoterWeightRecord Realm")]
     InvalidMaxVoterWeightRecordRealm,

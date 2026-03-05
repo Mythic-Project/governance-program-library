@@ -83,8 +83,7 @@ async fn test_update_collection_config_invalidates_max_voter_weight_record_expir
     let _clock = core_voter_test.bench.get_clock().await;
 
     // Assert
-    let max_voter_weight_total =
-        (collection_1_weight * collection_1_size) + (collection_2_weight * collection_2_size);
+    let max_voter_weight_total = collection_1_weight + collection_2_weight;
 
     assert!(registrar.collection_configs.len() == 2);
     assert!(max_voter_weight_record.max_voter_weight_expiry.is_none());
@@ -181,8 +180,7 @@ async fn test_update_max_voter_weight_record_provides_valid_expirey() -> Result<
         .await;
 
     // Assert
-    let max_voter_weight_total =
-        (collection_1_weight * collection_1_size) + (collection_2_weight * collection_2_size);
+    let max_voter_weight_total = collection_1_weight + collection_2_weight;
 
     assert!(registrar.collection_configs.len() == 2);
     assert!(max_voter_weight_record.max_voter_weight == max_voter_weight_total as u64);

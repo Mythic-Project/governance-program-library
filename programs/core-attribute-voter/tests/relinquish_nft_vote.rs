@@ -38,7 +38,7 @@ async fn test_relinquish_nft_vote() -> Result<(), TransportError> {
             &registrar_cookie,
             &collection_cookie,
             &max_voter_weight_record_cookie,
-            Some(ConfigureCollectionArgs { max_weight: 1, ..Default::default() }), // Set Size == 1 to complete voting with just one vote
+            Some(ConfigureCollectionArgs { max_weight: 1, ..Default::default() }), // max_weight == 1 to complete voting with just one vote
         )
         .await?;
 
@@ -239,8 +239,7 @@ async fn test_relinquish_nft_vote_for_proposal_in_voting_state_and_vote_record_e
             &registrar_cookie,
             &collection_cookie,
             &max_voter_weight_record_cookie,
-            None
-            
+            Some(ConfigureCollectionArgs { max_weight: 5, ..Default::default() }), // max_weight > vote weight so proposal stays in Voting
         )
         .await?;
 
@@ -285,8 +284,6 @@ async fn test_relinquish_nft_vote_for_proposal_in_voting_state_and_vote_record_e
         .err()
         .unwrap();
 
-    println!("{:?}", err);
-
     // Assert
     assert_nft_voter_err(err, CoreNftAttributeVoterError::VoteRecordMustBeWithdrawn);
 
@@ -323,7 +320,7 @@ async fn test_relinquish_nft_vote_with_invalid_voter_error() -> Result<(), Trans
             &registrar_cookie,
             &collection_cookie,
             &max_voter_weight_record_cookie,
-            Some(ConfigureCollectionArgs { max_weight: 1, ..Default::default() }), // Set Size == 1 to complete voting with just one vote
+            Some(ConfigureCollectionArgs { max_weight: 1, ..Default::default() }), // max_weight == 1 to complete voting with just one vote
         )
         .await?;
 
@@ -591,7 +588,7 @@ async fn test_relinquish_nft_vote_using_delegate() -> Result<(), TransportError>
             &registrar_cookie,
             &collection_cookie,
             &max_voter_weight_record_cookie,
-            Some(ConfigureCollectionArgs { max_weight: 1, ..Default::default() }), // Set Size == 1 to complete voting with just one vote
+            Some(ConfigureCollectionArgs { max_weight: 1, ..Default::default() }), // max_weight == 1 to complete voting with just one vote
         )
         .await?;
 

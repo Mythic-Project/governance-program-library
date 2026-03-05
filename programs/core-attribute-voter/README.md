@@ -12,7 +12,7 @@ Core Attribute Voter allows DAOs to use NFT collections for governance voting wh
 
 Each configured collection specifies:
 - A **weight attribute key** (e.g. `"voting_power"`, `"tier"`) — the attribute name to read from each NFT
-- A **max weight** — a ceiling that caps any single NFT's voting power
+- A **max weight** — a ceiling that caps any single NFT's voting power and represents the collection's max governance weight
 - An **expected attribute authority** — the trusted authority that set the attributes
 
 When a voter submits their NFTs, the program:
@@ -32,10 +32,39 @@ When a voter submits their NFTs, the program:
 The maximum possible voting power across all configured collections:
 
 ```
-max_voter_weight = Σ (collection.size × collection.max_weight)
+max_voter_weight = Σ collection.max_weight
 ```
 
-This is used by SPL Governance to calculate quorum thresholds.
+This is used by SPL Governance to calculate quorum thresholds. Unlike the nft-voter and core-voter plugins (where max weight = `collection_size × weight_per_nft`), attribute-based voting has variable per-NFT weights, so `max_weight` must be set by the realm authority to reflect the expected total voting power of each collection.
+
+#### Setting `max_weight` correctly
+
+`max_weight` plays a dual role — it caps individual NFT weights **and** feeds into the quorum denominator. Getting it right matters:
+
+**Example 1 — Well-calibrated:**
+A collection of 50 NFTs where attributes range from 1–10, totalling ~200 across the collection.
+Setting `max_weight = 200` means:
+- Individual NFTs are capped at 200 (effectively uncapped since max attribute is 10)
+- Quorum denominator reflects the true total voting power
+- A 60% quorum requires 120 voting power to pass
+
+**Example 2 — Set too low:**
+Same collection, but `max_weight = 50`.
+- Individual NFTs with attribute > 50 get capped (unlikely here, but enforced)
+- Quorum denominator is only 50, so just 30 voting power (60% quorum) passes a proposal
+- Risk: a small minority of NFT holders can pass proposals
+
+**Example 3 — Set too high:**
+Same collection, but `max_weight = 10000`.
+- No individual capping (attributes are far below 10000)
+- Quorum denominator is 10000, so 6000 voting power needed for 60% quorum
+- Risk: quorum becomes unreachable since the collection only holds ~200 total power
+
+**Example 4 — Multiple collections:**
+Collection A: `max_weight = 500`, Collection B: `max_weight = 300`.
+- `max_voter_weight = 500 + 300 = 800`
+- A voter holding NFTs from both collections accumulates weight across them
+- 60% quorum requires 480 total voting power
 
 ## Architecture
 
@@ -133,7 +162,7 @@ relinquish_nft_vote()
 
 | Parameter | Type | Constraints | Description |
 |---|---|---|---|
-| `max_weight` | `u64` | Any value | Per-NFT weight ceiling |
+| `max_weight` | `u64` | > 0 | Max governance weight for the collection. Caps individual NFT weights and is summed across collections for quorum calculation. Should reflect the expected total voting power of the collection. |
 | `weight_attribute_key` | `String` | 1–32 characters | Attribute name to read from NFTs |
 | `expected_attribute_authority` | `PluginAuthority` | Must match plugin | Trusted authority for attribute validation |
 
