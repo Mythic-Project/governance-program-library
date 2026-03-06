@@ -12,6 +12,9 @@ pub enum CoreNftAttributeVoterError {
     #[msg("Invalid max weight, must be greater than 0")]
     InvalidMaxWeight,
 
+    #[msg("Invalid total weight, must be greater than 0")]
+    InvalidTotalWeight,
+
     #[msg("Invalid MaxVoterWeightRecord Realm")]
     InvalidMaxVoterWeightRecordRealm,
 

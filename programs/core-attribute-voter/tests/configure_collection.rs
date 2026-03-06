@@ -62,7 +62,7 @@ async fn test_configure_collection() -> Result<(), TransportError> {
     assert_eq!(max_voter_weight_record.max_voter_weight_expiry, None);
     assert_eq!(
         max_voter_weight_record.max_voter_weight,
-        registrar.collection_configs[0].max_weight
+        registrar.collection_configs[0].total_weight
     );
 
     Ok(())
@@ -501,6 +501,43 @@ async fn test_configure_collection_with_empty_weight_attribute_key_error(
 
     // Assert
     assert_nft_voter_err(err, CoreNftAttributeVoterError::InvalidWeightAttributeKey);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_configure_collection_with_zero_total_weight_error(
+) -> Result<(), TransportError> {
+    // Arrange
+    let mut core_voter_test = CoreVoterTest::start_new().await;
+
+    let realm_cookie = core_voter_test.governance.with_realm().await?;
+
+    let registrar_cookie = core_voter_test.with_registrar(&realm_cookie).await?;
+
+    let collection_cookie = core_voter_test.core.create_collection(Some(1)).await?;
+
+    let max_voter_weight_record_cookie = core_voter_test
+        .with_max_voter_weight_record(&registrar_cookie)
+        .await?;
+
+    // Act
+    let err = core_voter_test
+        .with_collection(
+            &registrar_cookie,
+            &collection_cookie,
+            &max_voter_weight_record_cookie,
+            Some(ConfigureCollectionArgs {
+                total_weight: Some(0),
+                ..Default::default()
+            }),
+        )
+        .await
+        .err()
+        .unwrap();
+
+    // Assert
+    assert_nft_voter_err(err, CoreNftAttributeVoterError::InvalidTotalWeight);
 
     Ok(())
 }

@@ -22,7 +22,8 @@ async fn test_update_collection_config_invalidates_max_voter_weight_record_expir
         .await?;
 
     let collection_1_size = 7;
-    let collection_1_weight = 5;
+    let collection_1_max_weight = 5;
+    let collection_1_total_weight = 40;
 
     let collection_cookie_1 = core_voter_test
         .core
@@ -36,7 +37,8 @@ async fn test_update_collection_config_invalidates_max_voter_weight_record_expir
             &collection_cookie_1,
             &max_voter_weight_record_cookie,
             Some(ConfigureCollectionArgs {
-                max_weight: collection_1_weight,
+                max_weight: collection_1_max_weight,
+                total_weight: Some(collection_1_total_weight),
                 ..Default::default()
             }),
         )
@@ -48,7 +50,8 @@ async fn test_update_collection_config_invalidates_max_voter_weight_record_expir
         .await?;
 
     let collection_2_size = 10;
-    let collection_2_weight = 2;
+    let collection_2_max_weight = 2;
+    let collection_2_total_weight = 30;
 
     // Generate a new collection and update the registrar with the additional collection
     // while invalidating max voter weight.
@@ -64,7 +67,8 @@ async fn test_update_collection_config_invalidates_max_voter_weight_record_expir
             &collection_cookie_2,
             &max_voter_weight_record_cookie,
             Some(ConfigureCollectionArgs {
-                max_weight: collection_2_weight,
+                max_weight: collection_2_max_weight,
+                total_weight: Some(collection_2_total_weight),
                 ..Default::default()
             }),
         )
@@ -83,7 +87,7 @@ async fn test_update_collection_config_invalidates_max_voter_weight_record_expir
     let _clock = core_voter_test.bench.get_clock().await;
 
     // Assert
-    let max_voter_weight_total = collection_1_weight + collection_2_weight;
+    let max_voter_weight_total = collection_1_total_weight + collection_2_total_weight;
 
     assert!(registrar.collection_configs.len() == 2);
     assert!(max_voter_weight_record.max_voter_weight_expiry.is_none());
@@ -110,7 +114,8 @@ async fn test_update_max_voter_weight_record_provides_valid_expirey() -> Result<
 
     // Set collection sizes and weights for collection_1
     let collection_1_size = 11;
-    let collection_1_weight = 4;
+    let collection_1_max_weight = 4;
+    let collection_1_total_weight = 44;
 
     let collection_cookie_1 = core_voter_test
         .core
@@ -124,7 +129,8 @@ async fn test_update_max_voter_weight_record_provides_valid_expirey() -> Result<
             &collection_cookie_1,
             &max_voter_weight_record_cookie,
             Some(ConfigureCollectionArgs {
-                max_weight: collection_1_weight,
+                max_weight: collection_1_max_weight,
+                total_weight: Some(collection_1_total_weight),
                 ..Default::default()
             }),
         )
@@ -145,7 +151,8 @@ async fn test_update_max_voter_weight_record_provides_valid_expirey() -> Result<
     // which also invalidates max_voter_weight_expirey.
 
     let collection_2_size = 9;
-    let collection_2_weight = 3;
+    let collection_2_max_weight = 3;
+    let collection_2_total_weight = 27;
     let collection_cookie_2 = core_voter_test
         .core
         .create_collection(Some(collection_2_size))
@@ -158,7 +165,8 @@ async fn test_update_max_voter_weight_record_provides_valid_expirey() -> Result<
             &collection_cookie_2,
             &max_voter_weight_record_cookie,
             Some(ConfigureCollectionArgs {
-                max_weight: collection_2_weight,
+                max_weight: collection_2_max_weight,
+                total_weight: Some(collection_2_total_weight),
                 ..Default::default()
             }),
         )
@@ -180,7 +188,7 @@ async fn test_update_max_voter_weight_record_provides_valid_expirey() -> Result<
         .await;
 
     // Assert
-    let max_voter_weight_total = collection_1_weight + collection_2_weight;
+    let max_voter_weight_total = collection_1_total_weight + collection_2_total_weight;
 
     assert!(registrar.collection_configs.len() == 2);
     assert!(max_voter_weight_record.max_voter_weight == max_voter_weight_total as u64);

@@ -52,11 +52,12 @@ pub mod core_attribute_voter {
     pub fn configure_collection(
         ctx: Context<ConfigureCollection>,
         max_weight: u64,
+        total_weight: u64,
         weight_attribute_key: String,
         expected_attribute_authority: mpl_core::types::PluginAuthority,
     ) -> Result<()> {
         log_version();
-        instructions::configure_collection(ctx, max_weight, weight_attribute_key, expected_attribute_authority)
+        instructions::configure_collection(ctx, max_weight, total_weight, weight_attribute_key, expected_attribute_authority)
     }
 
     pub fn cast_nft_vote<'a, 'b, 'c, 'info>(

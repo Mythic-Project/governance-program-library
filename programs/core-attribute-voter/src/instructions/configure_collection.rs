@@ -49,6 +49,7 @@ pub struct ConfigureCollection<'info> {
 pub fn configure_collection(
     ctx: Context<ConfigureCollection>,
     max_weight: u64,
+    total_weight: u64,
     weight_attribute_key: String,
     expected_attribute_authority: PluginAuthority,
 ) -> Result<()> {
@@ -71,6 +72,11 @@ pub fn configure_collection(
         CoreNftAttributeVoterError::InvalidMaxWeight
     );
 
+    require!(
+        total_weight > 0,
+        CoreNftAttributeVoterError::InvalidTotalWeight
+    );
+
     // Validate weight_attribute_key
     require!(
         !weight_attribute_key.is_empty() && weight_attribute_key.len() <= 32,
@@ -80,6 +86,7 @@ pub fn configure_collection(
     let collection_config = CollectionConfig {
         collection: collection_key,
         max_weight,
+        total_weight,
         weight_attribute_key,
         expected_attribute_authority,
         reserved: [0; 8],

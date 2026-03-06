@@ -57,6 +57,7 @@ pub struct CollectionConfigCookie {
 
 pub struct ConfigureCollectionArgs {
     pub max_weight: u64,
+    pub total_weight: Option<u64>,
     pub weight_attribute_key: String,
     pub expected_attribute_authority: mpl_core::types::PluginAuthority,
 }
@@ -65,6 +66,7 @@ impl Default for ConfigureCollectionArgs {
     fn default() -> Self {
         Self {
             max_weight: 1,
+            total_weight: None,
             weight_attribute_key: "weight".to_string(),
             expected_attribute_authority: mpl_core::types::PluginAuthority::UpdateAuthority,
         }
@@ -522,10 +524,12 @@ impl CoreVoterTest {
         signers_override: Option<&[&Keypair]>,
     ) -> Result<CollectionConfigCookie, BanksClientError> {
         let args = args.unwrap_or_default();
+        let total_weight = args.total_weight.unwrap_or(args.max_weight);
 
         let data =
             anchor_lang::InstructionData::data(&gpl_core_attribute_voter::instruction::ConfigureCollection {
                 max_weight: args.max_weight,
+                total_weight,
                 weight_attribute_key: args.weight_attribute_key.clone(),
                 expected_attribute_authority: args.expected_attribute_authority.clone(),
             });
@@ -556,6 +560,7 @@ impl CoreVoterTest {
         let collection_config = CollectionConfig {
             collection: collection_cookie.collection,
             max_weight: args.max_weight,
+            total_weight,
             weight_attribute_key: args.weight_attribute_key,
             expected_attribute_authority: args.expected_attribute_authority,
             reserved: [0; 8],
