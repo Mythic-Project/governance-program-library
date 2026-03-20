@@ -68,7 +68,7 @@ impl Registrar {
         self.collection_configs
             .iter()
             .try_fold(0u64, |sum, cc| {
-                sum.checked_add(cc.max_weight)
+                sum.checked_add(cc.total_weight)
                     .ok_or_else(|| CoreNftAttributeVoterError::ArithmeticOverflow.into())
             })
     }
