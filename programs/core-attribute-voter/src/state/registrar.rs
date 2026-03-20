@@ -116,6 +116,11 @@ pub fn resolve_proposal_account(
         return Err(CoreNftAttributeVoterError::InvalidProposalState.into());
     }
 
+    require!(
+        proposal_data.governing_token_mint == registrar.governing_token_mint,
+        CoreNftAttributeVoterError::InvalidGoverningTokenMintForProposal
+    );
+
     Ok(proposal_info.key())
 }
 

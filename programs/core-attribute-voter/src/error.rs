@@ -100,4 +100,7 @@ pub enum CoreNftAttributeVoterError {
 
     #[msg("Failed to borrow VoteRecord data")]
     VoteRecordBorrowFailed,
+
+    #[msg("Invalid GoverningTokenMint for Proposal")]
+    InvalidGoverningTokenMintForProposal,
 }

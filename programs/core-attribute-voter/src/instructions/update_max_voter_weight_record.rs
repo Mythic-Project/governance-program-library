@@ -28,11 +28,10 @@ pub fn update_max_voter_weight_record(ctx: Context<UpdateMaxVoterWeightRecord>) 
     // the max weight of each collection.
     ctx.accounts.max_voter_weight_record.max_voter_weight = registrar.max_voter_weight()?;
 
-    // Record is only valid as of the current slot
-    let slot = Clock::get()?.slot;
-    msg!("Clock: {:?}", slot);
-
-    ctx.accounts.max_voter_weight_record.max_voter_weight_expiry = Some(slot);
+    // max_voter_weight is derived deterministically from the registrar's collection configs
+    // which only change via configure_collection (which also updates this record).
+    // Setting expiry to None avoids forcing governance users to bundle this instruction.
+    ctx.accounts.max_voter_weight_record.max_voter_weight_expiry = None;
 
     Ok(())
 }

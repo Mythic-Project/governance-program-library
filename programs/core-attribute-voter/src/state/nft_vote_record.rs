@@ -37,7 +37,12 @@ impl AssetVoteRecord {
     pub const ACCOUNT_DISCRIMINATOR: [u8; 8] = [14, 166, 191, 239, 186, 156, 140, 83];
 }
 
-impl AccountMaxSize for AssetVoteRecord {}
+impl AccountMaxSize for AssetVoteRecord {
+    fn get_max_size(&self) -> Option<usize> {
+        // 8 (discriminator) + 32 (proposal) + 32 (asset_mint) + 32 (governing_token_owner) + 8 (reserved)
+        Some(112)
+    }
+}
 
 impl IsInitialized for AssetVoteRecord {
     fn is_initialized(&self) -> bool {
