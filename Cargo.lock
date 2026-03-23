@@ -1892,6 +1892,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "gpl-core-attribute-voter"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "anchor-spl",
+ "arrayref",
+ "borsh 0.10.4",
+ "borsh 1.6.0",
+ "itertools 0.12.1",
+ "mpl-core",
+ "solana-program",
+ "solana-program-test",
+ "solana-sdk",
+ "spl-governance-mythic",
+ "spl-governance-tools-mythic",
+ "spl-token 6.0.0",
+]
+
+[[package]]
 name = "gpl-core-voter"
 version = "0.2.2"
 dependencies = [
