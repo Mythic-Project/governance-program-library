@@ -13,3 +13,9 @@ pub use voter_weight_record::*;
 pub mod voter_weight_record;
 
 pub mod idl_types;
+
+pub use nft_vote_record_sponsored::*;
+pub mod nft_vote_record_sponsored;
+
+pub use sponsor::*;
+pub mod sponsor;

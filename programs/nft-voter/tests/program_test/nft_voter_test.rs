@@ -11,13 +11,15 @@ use spl_governance::instruction::cast_vote;
 use spl_governance::state::vote_record::{self, Vote, VoteChoice};
 
 use gpl_nft_voter::state::{
-    get_nft_vote_record_address, get_registrar_address, CollectionConfig, NftVoteRecord, Registrar,
+    get_nft_vote_record_address, get_nft_vote_record_sponsored_address, get_registrar_address,
+    get_sponsor_address, CollectionConfig, NftVoteRecord, NftVoteRecordSponsored, Registrar,
 };
 
 use solana_program_test::{BanksClientError, ProgramTest};
 use solana_sdk::instruction::Instruction;
 use solana_sdk::signature::Keypair;
 use solana_sdk::signer::Signer;
+use solana_sdk::system_instruction;
 
 use crate::program_test::governance_test::GovernanceTest;
 use crate::program_test::program_test_bench::ProgramTestBench;
@@ -72,6 +74,28 @@ pub struct CastNftVoteArgs {
 }
 
 impl Default for CastNftVoteArgs {
+    fn default() -> Self {
+        Self {
+            cast_spl_gov_vote: true,
+        }
+    }
+}
+
+pub struct SponsorCookie {
+    pub address: Pubkey,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct NftVoteRecordSponsoredCookie {
+    pub address: Pubkey,
+    pub account: NftVoteRecordSponsored,
+}
+
+pub struct CastNftVoteSponsoredArgs {
+    pub cast_spl_gov_vote: bool,
+}
+
+impl Default for CastNftVoteSponsoredArgs {
     fn default() -> Self {
         Self {
             cast_spl_gov_vote: true,
@@ -593,5 +617,272 @@ impl NftVoterTest {
     #[allow(dead_code)]
     pub async fn get_voter_weight_record(&self, voter_weight_record: &Pubkey) -> VoterWeightRecord {
         self.bench.get_anchor_account(*voter_weight_record).await
+    }
+
+    // ---- Sponsored voting helpers ----
+
+    #[allow(dead_code)]
+    pub async fn with_sponsor(
+        &mut self,
+        registrar_cookie: &RegistrarCookie,
+        realm_cookie: &RealmCookie,
+    ) -> Result<SponsorCookie, BanksClientError> {
+        self.with_sponsor_using_ix(registrar_cookie, realm_cookie, NopOverride, None)
+            .await
+    }
+
+    #[allow(dead_code)]
+    pub async fn with_sponsor_using_ix<F: Fn(&mut Instruction)>(
+        &mut self,
+        registrar_cookie: &RegistrarCookie,
+        realm_cookie: &RealmCookie,
+        instruction_override: F,
+        signers_override: Option<&[&Keypair]>,
+    ) -> Result<SponsorCookie, BanksClientError> {
+        let sponsor_key = get_sponsor_address(&registrar_cookie.address);
+
+        let data =
+            anchor_lang::InstructionData::data(&gpl_nft_voter::instruction::CreateSponsor {});
+
+        let accounts = gpl_nft_voter::accounts::CreateSponsor {
+            registrar: registrar_cookie.address,
+            sponsor: sponsor_key,
+            realm: realm_cookie.address,
+            realm_authority: registrar_cookie.realm_authority.pubkey(),
+            payer: self.bench.payer.pubkey(),
+            system_program: solana_sdk::system_program::id(),
+        };
+
+        let mut create_sponsor_ix = Instruction {
+            program_id: gpl_nft_voter::id(),
+            accounts: anchor_lang::ToAccountMetas::to_account_metas(&accounts, None),
+            data,
+        };
+
+        instruction_override(&mut create_sponsor_ix);
+
+        let default_signers = &[&registrar_cookie.realm_authority];
+        let signers = signers_override.unwrap_or(default_signers);
+
+        self.bench
+            .process_transaction(&[create_sponsor_ix], Some(signers))
+            .await?;
+
+        Ok(SponsorCookie {
+            address: sponsor_key,
+        })
+    }
+
+    #[allow(dead_code)]
+    pub async fn fund_sponsor(
+        &self,
+        sponsor_cookie: &SponsorCookie,
+        amount: u64,
+    ) -> Result<(), BanksClientError> {
+        let transfer_ix = system_instruction::transfer(
+            &self.bench.payer.pubkey(),
+            &sponsor_cookie.address,
+            amount,
+        );
+
+        self.bench
+            .process_transaction(&[transfer_ix], None)
+            .await
+    }
+
+    #[allow(dead_code)]
+    pub async fn withdraw_sponsor(
+        &self,
+        sponsor_cookie: &SponsorCookie,
+        registrar_cookie: &RegistrarCookie,
+        destination: &Pubkey,
+        amount: u64,
+    ) -> Result<(), BanksClientError> {
+        let data = anchor_lang::InstructionData::data(
+            &gpl_nft_voter::instruction::WithdrawSponsor { amount },
+        );
+
+        let accounts = gpl_nft_voter::accounts::WithdrawSponsor {
+            registrar: registrar_cookie.address,
+            sponsor: sponsor_cookie.address,
+            realm: registrar_cookie.account.realm,
+            realm_authority: registrar_cookie.realm_authority.pubkey(),
+            destination: *destination,
+            system_program: solana_sdk::system_program::id(),
+        };
+
+        let withdraw_ix = Instruction {
+            program_id: gpl_nft_voter::id(),
+            accounts: anchor_lang::ToAccountMetas::to_account_metas(&accounts, None),
+            data,
+        };
+
+        self.bench
+            .process_transaction(&[withdraw_ix], Some(&[&registrar_cookie.realm_authority]))
+            .await
+    }
+
+    /// Casts NFT Vote with rent sponsored by the Sponsor account
+    #[allow(dead_code)]
+    pub async fn cast_nft_vote_sponsored(
+        &mut self,
+        registrar_cookie: &RegistrarCookie,
+        voter_weight_record_cookie: &VoterWeightRecordCookie,
+        max_voter_weight_record_cookie: &MaxVoterWeightRecordCookie,
+        proposal_cookie: &ProposalCookie,
+        sponsor_cookie: &SponsorCookie,
+        nft_voter_cookie: &WalletCookie,
+        voter_token_owner_record_cookie: &TokenOwnerRecordCookie,
+        nft_cookies: &[&NftCookie],
+        args: Option<CastNftVoteSponsoredArgs>,
+    ) -> Result<Vec<NftVoteRecordSponsoredCookie>, BanksClientError> {
+        let args = args.unwrap_or_default();
+
+        let data = anchor_lang::InstructionData::data(
+            &gpl_nft_voter::instruction::CastNftVoteSponsored {
+                proposal: proposal_cookie.address,
+            },
+        );
+
+        let accounts = gpl_nft_voter::accounts::CastNftVoteSponsored {
+            registrar: registrar_cookie.address,
+            voter_weight_record: voter_weight_record_cookie.address,
+            sponsor: sponsor_cookie.address,
+            voter_token_owner_record: voter_token_owner_record_cookie.address,
+            voter_authority: nft_voter_cookie.address,
+            system_program: solana_sdk::system_program::id(),
+        };
+
+        let mut account_metas = anchor_lang::ToAccountMetas::to_account_metas(&accounts, None);
+        let mut nft_vote_record_sponsored_cookies = vec![];
+
+        for nft_cookie in nft_cookies {
+            account_metas.push(AccountMeta::new_readonly(nft_cookie.address, false));
+            account_metas.push(AccountMeta::new_readonly(nft_cookie.metadata, false));
+
+            let nft_vote_record_sponsored_key = get_nft_vote_record_sponsored_address(
+                &proposal_cookie.address,
+                &nft_cookie.mint_cookie.address,
+            );
+            account_metas.push(AccountMeta::new(nft_vote_record_sponsored_key, false));
+
+            let account = NftVoteRecordSponsored {
+                proposal: proposal_cookie.address,
+                nft_mint: nft_cookie.mint_cookie.address,
+                governing_token_owner: voter_weight_record_cookie
+                    .account
+                    .governing_token_owner,
+                sponsor: sponsor_cookie.address,
+                account_discriminator: NftVoteRecordSponsored::ACCOUNT_DISCRIMINATOR,
+                reserved: [0; 8],
+            };
+
+            nft_vote_record_sponsored_cookies.push(NftVoteRecordSponsoredCookie {
+                address: nft_vote_record_sponsored_key,
+                account,
+            });
+        }
+
+        let cast_nft_vote_sponsored_ix = Instruction {
+            program_id: gpl_nft_voter::id(),
+            accounts: account_metas,
+            data,
+        };
+
+        let mut instructions = vec![cast_nft_vote_sponsored_ix];
+
+        if args.cast_spl_gov_vote {
+            let vote = Vote::Approve(vec![VoteChoice {
+                rank: 0,
+                weight_percentage: 100,
+            }]);
+
+            let cast_vote_ix = cast_vote(
+                &self.governance.program_id,
+                &registrar_cookie.account.realm,
+                &proposal_cookie.account.governance,
+                &proposal_cookie.address,
+                &proposal_cookie.account.token_owner_record,
+                &voter_token_owner_record_cookie.address,
+                &nft_voter_cookie.address,
+                &proposal_cookie.account.governing_token_mint,
+                &self.bench.payer.pubkey(),
+                Some(voter_weight_record_cookie.address),
+                Some(max_voter_weight_record_cookie.address),
+                vote,
+            );
+
+            instructions.push(cast_vote_ix);
+        }
+
+        self.bench
+            .process_transaction(&instructions, Some(&[&nft_voter_cookie.signer]))
+            .await?;
+
+        Ok(nft_vote_record_sponsored_cookies)
+    }
+
+    #[allow(dead_code)]
+    pub async fn relinquish_nft_vote_sponsored(
+        &mut self,
+        registrar_cookie: &RegistrarCookie,
+        voter_weight_record_cookie: &VoterWeightRecordCookie,
+        proposal_cookie: &ProposalCookie,
+        sponsor_cookie: &SponsorCookie,
+        voter_cookie: &WalletCookie,
+        voter_token_owner_record_cookie: &TokenOwnerRecordCookie,
+        nft_vote_record_sponsored_cookies: &Vec<NftVoteRecordSponsoredCookie>,
+    ) -> Result<(), BanksClientError> {
+        let data = anchor_lang::InstructionData::data(
+            &gpl_nft_voter::instruction::RelinquishNftVoteSponsored {},
+        );
+
+        let vote_record_key = vote_record::get_vote_record_address(
+            &self.governance.program_id,
+            &proposal_cookie.address,
+            &voter_token_owner_record_cookie.address,
+        );
+
+        let accounts = gpl_nft_voter::accounts::RelinquishNftVoteSponsored {
+            registrar: registrar_cookie.address,
+            voter_weight_record: voter_weight_record_cookie.address,
+            sponsor: sponsor_cookie.address,
+            governance: proposal_cookie.account.governance,
+            proposal: proposal_cookie.address,
+            voter_token_owner_record: voter_token_owner_record_cookie.address,
+            voter_authority: voter_cookie.address,
+            vote_record: vote_record_key,
+        };
+
+        let mut account_metas = anchor_lang::ToAccountMetas::to_account_metas(&accounts, None);
+
+        for nft_vote_record_sponsored_cookie in nft_vote_record_sponsored_cookies {
+            account_metas.push(AccountMeta::new(
+                nft_vote_record_sponsored_cookie.address,
+                false,
+            ));
+        }
+
+        let relinquish_ix = Instruction {
+            program_id: gpl_nft_voter::id(),
+            accounts: account_metas,
+            data,
+        };
+
+        self.bench
+            .process_transaction(&[relinquish_ix], Some(&[&voter_cookie.signer]))
+            .await?;
+
+        Ok(())
+    }
+
+    #[allow(dead_code)]
+    pub async fn get_nft_vote_record_sponsored_account(
+        &self,
+        nft_vote_record_sponsored: &Pubkey,
+    ) -> NftVoteRecordSponsored {
+        self.bench
+            .get_borsh_account::<NftVoteRecordSponsored>(nft_vote_record_sponsored)
+            .await
     }
 }

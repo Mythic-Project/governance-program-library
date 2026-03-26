@@ -61,6 +61,29 @@ pub mod nft_voter {
         log_version();
         instructions::cast_nft_vote(ctx, proposal)
     }
+
+    pub fn create_sponsor(ctx: Context<CreateSponsor>) -> Result<()> {
+        log_version();
+        instructions::create_sponsor(ctx)
+    }
+
+    pub fn withdraw_sponsor(ctx: Context<WithdrawSponsor>, amount: u64) -> Result<()> {
+        log_version();
+        instructions::withdraw_sponsor(ctx, amount)
+    }
+
+    pub fn cast_nft_vote_sponsored<'info>(
+        ctx: Context<'_, '_, '_, 'info, CastNftVoteSponsored<'info>>,
+        proposal: Pubkey,
+    ) -> Result<()> {
+        log_version();
+        instructions::cast_nft_vote_sponsored(ctx, proposal)
+    }
+
+    pub fn relinquish_nft_vote_sponsored(ctx: Context<RelinquishNftVoteSponsored>) -> Result<()> {
+        log_version();
+        instructions::relinquish_nft_vote_sponsored(ctx)
+    }
 }
 
 fn log_version() {
